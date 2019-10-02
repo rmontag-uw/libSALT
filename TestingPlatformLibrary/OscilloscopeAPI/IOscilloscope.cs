@@ -40,10 +40,6 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         /// </summary>
         void Stop();
 
-        void WriteRawCommand(string command);
-
-        string WriteRawQuery(string query);
-
         /// <summary>
         /// Enables the given channel, making it display on the oscilloscope screen
         /// </summary>
@@ -71,6 +67,7 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         /// <summary>
         /// Equivalent to pushing the auto[scale] button on the oscilloscope. This automatically adjusts the vert. and horiz. scale, and trigger
         /// settings to optimize waveform display. If there is no auto[scale] feature on an oscilloscope, this function does nothing.
+        /// <remarks>Make sure letting your users push this button remotely is something you really want.</remarks>
         /// </summary>
         void AutoScale();
 
@@ -104,7 +101,7 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         /// </summary>
         /// <remarks>For the DS1054z returns 8</remarks>
         /// <returns>The scale constant for voltage offset</returns>
-        double GetVoltageOffsetScaleConstant();
+        double GetYAxisOffsetScaleConstant();
 
         /// <summary>
         /// The highest and lowest possible trigger voltage values are found by multiplying the current Y/Voltage scale by this constant, and then by 1 or -1 respectively to get 
@@ -120,7 +117,7 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         /// </summary>
         /// <remarks>For the DS1054z returns 10</remarks>
         /// <returns>The scale constant for x-axis/time position</returns>
-        double GetTimeOffsetScaleConstant();
+        double GetXAxisOffsetScaleConstant();
 
         /// <summary>
         /// Returns an array of voltage scale (double) values that are used as "presets" for the scope, such as 1V, 0.5v 10mV etc.  
@@ -220,53 +217,45 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         /// <returns>the y-axis increment for the active channel</returns>
         double GetYIncrement();
 
-        /// <summary>
-        /// Retrieves the vertical offset relative to the vertical reference position of the specified channel 
-        /// </summary>
-        /// <param name="channel">The channel to retrieve the vertical offset from</param>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if the requested channel doesn't exist</exception>
-        /// <returns>The vertical offset of the given channel</returns>
-        double GetYOrigin(int channel);
+        ///// <summary>
+        ///// Retrieves the vertical offset relative to the vertical reference position of the specified channel 
+        ///// </summary>
+        ///// <param name="channel">The channel to retrieve the vertical offset from</param>
+        ///// <exception cref="ArgumentOutOfRangeException">Thrown if the requested channel doesn't exist</exception>
+        ///// <returns>The vertical offset of the given channel</returns>
+        //double GetYOrigin(int channel);
+
+        ///// <summary>
+        ///// Retrieves the vertical offset relative to the vertical reference position of the active channel 
+        ///// </summary>
+        ///// <returns>The vertical offset of the active channel</returns>
+        //double GetYOrigin();
+
+        ///// <summary>
+        ///// Retrieves the vertical reference position of the specified channel in the Y direction
+        ///// </summary>
+        ///// <param name="channel">the channel to retrieve the vertical reference from</param>
+        ///// <exception cref="ArgumentOutOfRangeException">Thrown if the requested channel doesn't exist</exception>
+        ///// <returns>The vertical reference of the specified channel</returns>
+        //double GetYReference(int channel);
+
+        ///// <summary>
+        ///// Retrieves the vertical reference position of the active channel in the Y direction
+        ///// </summary>
+        ///// <returns>The vertical reference of the active channel</returns>
+        //double GetYReference();
 
         /// <summary>
-        /// Retrieves the vertical offset relative to the vertical reference position of the active channel 
+        /// Gets the current XAxis/time scale in seconds that the scope is set to.
         /// </summary>
-        /// <returns>The vertical offset of the active channel</returns>
-        double GetYOrigin();
+        /// <returns>The time scale in seconds/div of the scope</returns>
+        double GetXAxisScale();
 
         /// <summary>
-        /// Retrieves the vertical reference position of the specified channel in the Y direction
+        /// Sets the X-Axis/time scale of the scope for the given channel (if appropriate)
         /// </summary>
-        /// <param name="channel">the channel to retrieve the vertical reference from</param>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if the requested channel doesn't exist</exception>
-        /// <returns>The vertical reference of the specified channel</returns>
-        double GetYReference(int channel);
-
-        /// <summary>
-        /// Retrieves the vertical reference position of the active channel in the Y direction
-        /// </summary>
-        /// <returns>The vertical reference of the active channel</returns>
-        double GetYReference();
-
-        /// <summary>
-        /// Gets the current time scale in seconds that the selected channel is set to. 
-        /// </summary>
-        /// <remarks>On many scopes, there is only one time scale for the scope, which all channels share. 
-        /// If this is the case, this function will return the same value for any valid channel parameter</remarks>
-        /// <param name="channel">The channel to get the time scale from</param>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if the requested channel doesn't exist</exception>
-        /// <returns>The time scale in seconds of the given channel</returns>
-        double GetTimeScale(int channel);
-
-        /// <summary>
-        /// Sets the time scale of the scope for the given channel (if appropriate)
-        /// </summary>
-        /// <remarks>Many oscilloscopes share a unified time scale for all channels. 
-        /// If this is the case, the channel parameter is ignored</remarks>
-        /// <param name="channel">The channel to change the time (x axis) scale of if appropriate</param>
         /// <param name="timeScale">The time scale, in seconds, to change the time scale to</param>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if the requested channel doesn't exist</exception>
-        void SetTimeScale(int channel, double timeScale);
+        void SetXAxisScale(double timeScale);
 
         /// <summary>
         /// Gets the vertical offset of the waveform display for the given channel in volts.
@@ -274,7 +263,7 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         /// <param name="channel">The channel to get the vertical offset from</param>
         /// <returns>The vertical offset of the display (in volts) for the given channel</returns>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if the requested channel doesn't exist.</exception>
-        double GetVerticalOffset(int channel);
+        double GetYAxisOffset(int channel);
 
         /// <summary>
         /// Sets the vertical offset of the waveform display for the given channel.
@@ -283,27 +272,19 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         /// <param name="offset">The vertical offset to set for the given channel, in volts</param>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if the requested channel doesn't exist 
         /// or if the offset is out of range</exception>
-        void SetVerticalOffset(int channel, double offset);
+        void SetYAxisOffset(int channel, double offset);
 
         /// <summary>
-        /// Gets the position offset for the given channel, or for the whole scope if per channel x-axis offset is not supported
+        /// Gets the horizontal position/time offset for the scope.
         /// </summary>
-        /// <param name="channel">The channel to get the position offset from</param>
-        /// <returns>the position offset for the given channel, or for the whole scope if per channel x-axis offset is not supported</returns>
-        double GetPositionOffset(int channel);
+        /// <returns>The horizontal position/time offset for the scope</returns>
+        double GetXAxisOffset();
 
         /// <summary>
-        /// Sets the position (x-axis) offset for the given channel, or for the whole scope if per channel x-axis offset is not supported.
+        /// Sets the position (x-axis)/time offset for the scope.
         /// </summary>
-        /// <param name="channel">The channel to set the offset for, if supported</param>
-        /// <param name="offset">The position offset to set for the given channel</param>
-        void SetPositionOffset(int channel, double offset);
-
-        /// <summary>
-        /// Gets the current time scale in seconds that the active channel is set to. 
-        /// </summary>
-        /// <returns>The time scale in seconds of the active channel</returns>
-        double GetTimeScale();
+        /// <param name="offset">The position offset to set </param>
+        void SetXAxisOffset(double offset);
 
         /// <summary>
         /// Returns the level in V of the trigger line as a double

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using Ivi.Visa;
 using NationalInstruments.Visa;
 
 namespace TestingPlatformLibrary.OscilloscopeAPI
@@ -57,14 +56,6 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
             enabledChannels.Add(channel);
             WriteRawCommand(":CHANnel" + channel + ":DISPlay ON");  // turn on the given channel
         }
-
-        public override double GetTimeScale(int channel)  // this only makes sense in normal mode, if the scope is in Raw mode,
-                                                          // the data here makes no sense
-        {
-            CheckChannelParam(channel);
-            return GetTimeScale();
-        }
-
 
         public override double[] GetWaveVoltages(int channel)
         {
@@ -218,14 +209,14 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
             return GetYIncrement();
         }
 
-        public override double GetYOrigin(int channel)
+        public double GetYOrigin(int channel)
         {
             CheckChannelParam(channel);
             WriteRawCommand(":wav:sour chan" + channel);  // set the channel to grab the wavedata from to the one specified
             return GetYOrigin();
         }
 
-        public override double GetYReference(int channel)
+        public double GetYReference(int channel)
         {
             CheckChannelParam(channel);
             WriteRawCommand(":wav:sour chan" + channel);  // set the channel to grab the wavedata from to the one specified
@@ -276,19 +267,19 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
             return double.Parse(response, System.Globalization.NumberStyles.Float);
         }
 
-        public override double GetYOrigin()
+        public double GetYOrigin()
         {
             string response = WriteRawQuery(":WAV:YOR?");
             return double.Parse(response, System.Globalization.NumberStyles.Float);
         }
 
-        public override double GetYReference()
+        public double GetYReference()
         {
             string response = WriteRawQuery(":WAV:YREF?");
             return double.Parse(response, System.Globalization.NumberStyles.Float);
         }
 
-        public override double GetTimeScale()
+        public override double GetXAxisScale()
         {
             return double.Parse(WriteRawQuery(":TIMebase:MAIN:SCALe?"));
         }
@@ -339,29 +330,29 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
             return timeScalePresetStrings;
         }
 
-        public override void SetTimeScale(int channel, double timeScale)
+        public override void SetXAxisScale(double timeScale)
         {
             WriteRawCommand(":TIMebase:MAIN:SCALe " + timeScale);
         }
 
-        public override double GetVerticalOffset(int channel)
+        public override double GetYAxisOffset(int channel)
         {
             //:CHANnel<n>:OFFSet
             string response = WriteRawQuery(":CHANnel" + channel + ":OFFSet?");
             return double.Parse(response);
         }
 
-        public override void SetVerticalOffset(int channel, double offset)
+        public override void SetYAxisOffset(int channel, double offset)
         {
             WriteRawCommand(":CHANnel" + channel + ":OFFSet " + offset);
         }
 
-        public override double GetPositionOffset(int channel)
+        public override double GetXAxisOffset()
         {
             return double.Parse(WriteRawQuery(":TIMebase:MAIN:OFFSet?"));
         }
 
-        public override void SetPositionOffset(int channel, double offset)
+        public override void SetXAxisOffset(double offset)
         {
             WriteRawCommand(":TIMebase:MAIN:OFFSet " + offset);
         }
@@ -456,7 +447,7 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
             return double.Parse(WriteRawQuery(":WAVeform:XINCrement?"));
         }
 
-        public override double GetVoltageOffsetScaleConstant()
+        public override double GetYAxisOffsetScaleConstant()
         {
             return voltageOffsetScaleConstant;
         }
@@ -466,7 +457,7 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
             return triggerOffsetScaleConstant;
         }
 
-        public override double GetTimeOffsetScaleConstant()
+        public override double GetXAxisOffsetScaleConstant()
         {
             return timeOffsetScaleConstant;
         }

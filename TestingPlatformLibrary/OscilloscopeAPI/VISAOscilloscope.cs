@@ -189,6 +189,9 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         public abstract void SetActiveChannel(int channel);
         public abstract int GetActiveChannel();
         public abstract double GetMinimumVoltageScale();
+        public abstract double GetYAxisOffsetScaleConstant();
+        public abstract double GetTriggerPositionScaleConstant();
+        public abstract double GetXAxisOffsetScaleConstant();
         public abstract double[] GetVoltageScalePresets();
         public abstract string[] GetVoltageScalePresetStrings();
         public abstract double[] GetTimeScalePresets();
@@ -203,17 +206,16 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         public abstract double GetXIncrement(int channel);
         public abstract double GetXIncrement();
         public abstract double GetYIncrement();
-        public abstract double GetYOrigin(int channel);
-        public abstract double GetYOrigin();
-        public abstract double GetYReference(int channel);
-        public abstract double GetYReference();
-        public abstract double GetTimeScale(int channel);
-        public abstract void SetTimeScale(int channel, double timeScale);
-        public abstract double GetVerticalOffset(int channel);
-        public abstract void SetVerticalOffset(int channel, double offset);
-        public abstract double GetPositionOffset(int channel);
-        public abstract void SetPositionOffset(int channel, double offset);
-        public abstract double GetTimeScale();
+        //public abstract double GetYOrigin(int channel);
+        //public abstract double GetYOrigin();
+        //public abstract double GetYReference(int channel);
+        //public abstract double GetYReference();
+        public abstract double GetXAxisScale();
+        public abstract void SetXAxisScale(double timeScale);
+        public abstract double GetYAxisOffset(int channel);
+        public abstract void SetYAxisOffset(int channel, double offset);
+        public abstract double GetXAxisOffset();
+        public abstract void SetXAxisOffset(double offset);
         public abstract double GetTriggerLevel();
         public abstract void SetTriggerLevel(double voltageLevel);
         public abstract int GetMemDepth();
@@ -221,12 +223,9 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         public abstract int[] GetAllowedMemDepths();
         public abstract void Single();
         public abstract byte[] GetDeepMemData(int channel);
+        public abstract double[] GetDeepMemVoltages(int channel);
         public abstract Color GetChannelColor(int channel);
         public abstract string GetModelString();
         public abstract ConnectionType GetConnectionType();
-        public abstract double GetVoltageOffsetScaleConstant();
-        public abstract double GetTriggerPositionScaleConstant();
-        public abstract double GetTimeOffsetScaleConstant();
-        public abstract double[] GetDeepMemVoltages(int channel);
     }
 }
