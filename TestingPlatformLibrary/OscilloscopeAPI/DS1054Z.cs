@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using Ivi.Visa;
 using NationalInstruments.Visa;
+using TestAndMeasurementInterface;
 
-namespace TestingPlatformLibrary.OscilloscopeAPI
+namespace OscilloscopeAPI
 {
     public class DS1054Z : VISAOscilloscope
     {

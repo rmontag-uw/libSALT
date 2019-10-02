@@ -1,6 +1,7 @@
 ﻿using System;
+using TestAndMeasurementInterface;
 
-namespace TestingPlatformLibrary.OscilloscopeAPI
+namespace OscilloscopeAPI
 {
     public interface IOscilloscope : ITestAndMeasurement
     {
