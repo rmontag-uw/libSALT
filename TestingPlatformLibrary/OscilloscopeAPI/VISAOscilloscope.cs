@@ -4,9 +4,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading;
-using TestAndMeasurementInterface;
 
-namespace OscilloscopeAPI
+namespace TestingPlatformLibrary.OscilloscopeAPI
 {
     public abstract class VISAOscilloscope : IOscilloscope
     {
