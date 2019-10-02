@@ -111,8 +111,8 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
             IEnumerable<string> resources;
             ResourceManager rm = new ResourceManager();
             MessageBasedSession searcherMBS;
-            List<string> connectedDeviceModels = new List<string>();
-            List<string> rawVISAIDs = new List<string>();
+            List<string> connectedDeviceModels = new List<string>();  // a list of the model names of all connected oscilloscopes
+            List<string> rawVISAIDs = new List<string>();  // a list of all the raw VISA ids (what i'm calling the responses from .Find())
             List<VISAOscilloscope> toReturn = new List<VISAOscilloscope>();
             bool unknownOscilloscopesFound = false;
             try
@@ -160,22 +160,11 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         // All the scopes returned by this function are initialized and ready to be written to/read from
         private static VISAOscilloscope GetDeviceFromModelString(string modelString, string VISAID, ResourceManager rm)
         {
-            if (!validScopeModels.Contains(modelString))
-            {
-                return null;  // let the calling function deal with what happens if there's an unknown oscilloscope plugged in
-            } else
-            {
-                switch (modelString)
-                {
-                    case "RIGOL TECHNOLOGIES,DS1054Z":
-                        return new DS1054Z(VISAID,rm);
-                    case "RIGOL TECHNOLOGIES,DS1104Z":  // Our scope seems to be identifing itself as something else
-                        return new DS1054Z(VISAID, rm);
-                    default:
-                        throw new ArgumentOutOfRangeException("No instantiation case for oscilloscope " + modelString);
-                        // if we reach this, someone has added an entry to the array of valid scopes but has not added a proper instantiation case here
-                }
-            }
+            // reflection time
+            IEnumerable<Type> types = typeof(VISAOscilloscope)  // get all subclasses of VISAOscilloscope
+                .Assembly.GetTypes()
+                .Where(t => t.IsSubclassOf(typeof(VISAOscilloscope)) && !t.IsAbstract);
+                //.Select(t => (VISAOscilloscope)Activator.CreateInstance(t));
         }
 
         public abstract byte[] GetWaveData(int channel);
