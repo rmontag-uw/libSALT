@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace  TestingPlatformLibrary.FunctionGeneratorAPI
+namespace TestingPlatformLibrary.FunctionGeneratorAPI
 {
     public enum WaveformType
     {
