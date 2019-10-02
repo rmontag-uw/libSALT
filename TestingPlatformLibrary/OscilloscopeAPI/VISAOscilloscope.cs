@@ -105,6 +105,7 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
             }
 
         }
+
         public static ConnectedOscilloscopeStruct GetConnectedOscilloscopes()
         {
             IEnumerable<string> resources;
@@ -159,7 +160,6 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         // All the scopes returned by this function are initialized and ready to be written to/read from
         private static VISAOscilloscope GetDeviceFromModelString(string modelString, string VISAID, ResourceManager rm)
         {
-            Console.WriteLine(modelString);
             if (!validScopeModels.Contains(modelString))
             {
                 return null;  // let the calling function deal with what happens if there's an unknown oscilloscope plugged in
