@@ -16,7 +16,7 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         protected WaitHandle waitHandleIO;
         protected readonly ManualResetEvent manualResetEventIO;
         protected static readonly object threadLock = new object();
-        private static readonly string[] validScopeModels = new[] { "RIGOL TECHNOLOGIES,DS1054Z" , "RIGOL TECHNOLOGIES,DS1104Z"};  // replace this with some sort of reflection based system.
+        private static readonly string[] validScopeModels = new[] { "RIGOL TECHNOLOGIES,DS1054Z", "RIGOL TECHNOLOGIES,DS1104Z" };  // replace this with some sort of reflection based system.
 
         protected VISAOscilloscope(string visaID, ResourceManager rm, int numChannels)
         {
@@ -131,17 +131,18 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
                         IDNResponse = searcherMBS.FormattedIO.ReadLine();
                     }
                     string[] tokens = IDNResponse.Split(',');   // hopefully this isn't too slow
-                    string formattedIDNString = tokens[0] + "," + tokens[1];  // we run the IDN command on all connected devices
-                        // and then parse the response into the form <Manufacturer>, <Model>
+                    string formattedIDNString = tokens[1];  // we run the IDN command on all connected devices
+                                                                              // and then parse the response into the form <Model>
                     connectedDeviceModels.Add(formattedIDNString);
                 }
-                for(int i = 0; i < connectedDeviceModels.Count; i++)  // connectedDeviceModels.Count() == rawVISAIDs.Count()
+                for (int i = 0; i < connectedDeviceModels.Count; i++)  // connectedDeviceModels.Count() == rawVISAIDs.Count()
                 {
-                    VISAOscilloscope temp = GetDeviceFromModelString(connectedDeviceModels[i],rawVISAIDs[i], rm);
-                    if(temp == null)
+                    VISAOscilloscope temp = GetDeviceFromModelString(connectedDeviceModels[i], rawVISAIDs[i], rm);
+                    if (temp == null)
                     {
-                        unknownOscilloscopesFound = true;  // if there's one 
-                    } else
+                        unknownOscilloscopesFound = true;  // if there's a VISA device found that matches 
+                    }
+                    else
                     {
                         toReturn.Add(temp);
                     }
@@ -154,17 +155,26 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
             }
         }
 
-        // This should be replaced with some reflection based solution in the future, so that users would just need to drop in their scope implementation
-        // and recompile without having to touch anything here.
-        // if the modelString parameter is not found in the hardcoded list of valid scopes, this function returns null.
-        // All the scopes returned by this function are initialized and ready to be written to/read from
         private static VISAOscilloscope GetDeviceFromModelString(string modelString, string VISAID, ResourceManager rm)
         {
+            object[] parameterObject = { VISAID, rm };  // the parameters for all of the VISAOscilloscope subclass constructors
             // reflection time
-            IEnumerable<Type> types = typeof(VISAOscilloscope)  // get all subclasses of VISAOscilloscope
+            string currentNameSpace = typeof(VISAOscilloscope).Namespace; // get the namespace of this class, all subclasses must be
+                // in the same namespace in order to be found and instantiated via reflection.
+            IEnumerable<Type> types = typeof(VISAOscilloscope)  // get all (non abstract) subclasses of VISAOscilloscope that are located
+                    // in the same namespace of VISAOscilloscope
                 .Assembly.GetTypes()
-                .Where(t => t.IsSubclassOf(typeof(VISAOscilloscope)) && !t.IsAbstract);
-                //.Select(t => (VISAOscilloscope)Activator.CreateInstance(t));
+                .Where(t => t.IsSubclassOf(typeof(VISAOscilloscope)) && !t.IsAbstract && t.Namespace == currentNameSpace);
+            foreach (Type t in types)  // iterate over all found subclasses
+            {
+                if (modelString.Equals(t.Name))  // if the name of that subclass matches the model of the oscilloscope found, bingo!
+                {
+                    return (VISAOscilloscope) Activator.CreateInstance(t, parameterObject);  // create an instance of the object with the proper
+                        // constructor and return it
+                }
+            }
+            // if there's no matches, then there's a scope connected that doesn't have an associated implementation, so we return null
+            return null;
         }
 
         public abstract byte[] GetWaveData(int channel);
