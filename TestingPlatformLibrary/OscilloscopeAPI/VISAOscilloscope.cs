@@ -16,7 +16,7 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         protected WaitHandle waitHandleIO;
         protected readonly ManualResetEvent manualResetEventIO;
         protected static readonly object threadLock = new object();
-        private static readonly string[] validScopeModels = new[] { "RIGOL TECHNOLOGIES,DS1054Z", "RIGOL TECHNOLOGIES,DS1104Z" };  // replace this with some sort of reflection based system.
+       // private static readonly string[] validScopeModels = new[] { "RIGOL TECHNOLOGIES,DS1054Z", "RIGOL TECHNOLOGIES,DS1104Z" };  // replace this with some sort of reflection based system.
 
         protected VISAOscilloscope(string visaID, ResourceManager rm, int numChannels)
         {

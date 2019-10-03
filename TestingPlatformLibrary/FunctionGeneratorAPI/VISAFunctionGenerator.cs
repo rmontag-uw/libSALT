@@ -425,14 +425,14 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
             IEnumerable<string> resources;
             ResourceManager rm = new ResourceManager();
             MessageBasedSession searcherMBS;
-            List<string> connectedDeviceModels = new List<string>();
-            List<string> rawVISAIDs = new List<string>();
+            List<string> connectedDeviceModels = new List<string>();  // get a list of connected VISA device model names
+            List<string> rawVISAIDs = new List<string>();  // get a list of connect VISA devices' returned IDs
             List<VISAFunctionGenerator> toReturn = new List<VISAFunctionGenerator>();
             bool unknownFunctionGeneratorFound = false;
             try
             {
                 resources = rm.Find("?*");  // find all connected VISA devices
-                foreach (string s in resources)  // after this loop, connectedDeviceModels contains a list of connected devices in the form <Manufacturer>, <Model>
+                foreach (string s in resources)  // after this loop, connectedDeviceModels contains a list of connected devices in the form <Model>
                 {
                     rawVISAIDs.Add(s);  // we need to add 
                     string IDNResponse;
@@ -445,8 +445,8 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
                         IDNResponse = searcherMBS.FormattedIO.ReadLine();
                     }
                     string[] tokens = IDNResponse.Split(',');   // hopefully this isn't too slow
-                    string formattedIDNString = tokens[0] + "," + tokens[1];  // we run the IDN command on all connected devices
-                                                                              // and then parse the response into the form <Manufacturer>, <Model>
+                    string formattedIDNString =  tokens[1];  // we run the IDN command on all connected devices
+                                                                              // and then parse the response into the form <Model>
                     connectedDeviceModels.Add(formattedIDNString);
                 }
                 for (int i = 0; i < connectedDeviceModels.Count; i++)  // connectedDeviceModels.Count() == rawVISAIDs.Count()
