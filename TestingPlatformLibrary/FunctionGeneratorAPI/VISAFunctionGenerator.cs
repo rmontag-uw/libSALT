@@ -69,7 +69,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
         /// Writes the SCPI command stored in the string to the function generator.
         /// </summary>
         /// <param name="command">The SCPI command to write</param>
-        public void WriteRawCommand(string command)
+        protected void WriteRawCommand(string command)
         {
             lock (threadLock)
             {
@@ -107,7 +107,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
         /// <param name="query">The query to write to the generator</param>
         /// <exception cref="Ivi.Visa.IOTimeoutException">Thrown if the query command is invalid</exception>
         /// <returns>The function generator's response to the given query</returns>
-        public string WriteRawQuery(string query)
+        protected string WriteRawQuery(string query)
         {
             lock (threadLock)
             {

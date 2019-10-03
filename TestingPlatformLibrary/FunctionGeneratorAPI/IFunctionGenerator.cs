@@ -296,30 +296,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
         /// <returns>The waveform type of the given channel</returns>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if the requested channel doesn't exist</exception>
         WaveformType GetWaveformType(int channel);
-        /*
-         * Writes the SCPI command stored in the string to the function generator. 
-         */
-         /// <summary>
-         /// Writes the SCPI command stored in the string to the function generator.
-         /// </summary>
-         /// <param name="command">The SCPI command to write</param>
-        void WriteRawCommand(string command);
-
-        /*
-         * Most queries to the Function generator return a string, while commands return nothing, therefore, they must
-         * be handled separately. It is up to the implementor to handle the two cases.
-         */
-         /// <summary>
-         /// Writes the given query to the function generator, and returns the response as a string.
-         /// </summary>
-         /// <remarks>Most queries to the Function generator return a string, while commands return nothing, 
-         /// therefore, they must
-         /// be handled separately.It is up to the implementor to handle the two cases.</remarks>
-         /// <param name="query">The query to write to the generator</param>
-         /// <exception cref="Ivi.Visa.IOTimeoutException">Thrown if the query command is invalid</exception>
-         /// <returns>The function generator's response to the given query</returns>
-        string WriteRawQuery(string query);
-
+        
         /// <summary>
         /// Stores additional information about the waveform in the given memory location. It is up to the implementor to decide where this
         /// data is actually stored.
