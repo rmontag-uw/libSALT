@@ -425,14 +425,14 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
             IEnumerable<string> resources;
             ResourceManager rm = new ResourceManager();
             MessageBasedSession searcherMBS;
-            List<string> connectedDeviceModels = new List<string>();
-            List<string> rawVISAIDs = new List<string>();
+            List<string> connectedDeviceModels = new List<string>();  // get a list of connected VISA device model names
+            List<string> rawVISAIDs = new List<string>();  // get a list of connect VISA devices' returned IDs
             List<VISAFunctionGenerator> toReturn = new List<VISAFunctionGenerator>();
             bool unknownFunctionGeneratorFound = false;
             try
             {
                 resources = rm.Find("?*");  // find all connected VISA devices
-                foreach (string s in resources)  // after this loop, connectedDeviceModels contains a list of connected devices in the form <Manufacturer>, <Model>
+                foreach (string s in resources)  // after this loop, connectedDeviceModels contains a list of connected devices in the form <Model>
                 {
                     rawVISAIDs.Add(s);  // we need to add 
                     string IDNResponse;
@@ -445,8 +445,8 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
                         IDNResponse = searcherMBS.FormattedIO.ReadLine();
                     }
                     string[] tokens = IDNResponse.Split(',');   // hopefully this isn't too slow
-                    string formattedIDNString = tokens[0] + "," + tokens[1];  // we run the IDN command on all connected devices
-                                                                              // and then parse the response into the form <Manufacturer>, <Model>
+                    string formattedIDNString =  tokens[1];  // we run the IDN command on all connected devices
+                                                                              // and then parse the response into the form <Model>
                     connectedDeviceModels.Add(formattedIDNString);
                 }
                 for (int i = 0; i < connectedDeviceModels.Count; i++)  // connectedDeviceModels.Count() == rawVISAIDs.Count()
@@ -475,21 +475,24 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
         // All the scopes returned by this function are initialized and ready to be written to/read from
         private static VISAFunctionGenerator GetDeviceFromModelString(string modelString, string VISAID, ResourceManager rm)
         {
-            if (!validFunctionGeneratorModels.Contains(modelString))
+            object[] parameterObject = { VISAID, rm };  // the parameters for all of the VISAFunctionGenerator subclass constructors
+            // reflection time
+            string currentNameSpace = typeof(VISAFunctionGenerator).Namespace; // get the namespace of this class, all subclasses must be
+                                                                          // in the same namespace in order to be found and instantiated via reflection.
+            IEnumerable<Type> types = typeof(VISAFunctionGenerator)  // get all (non abstract) subclasses of VISAFunctionGenerator that are located
+                                                                // in the same namespace of VISAFunctionGenerator
+                .Assembly.GetTypes()
+                .Where(t => t.IsSubclassOf(typeof(VISAFunctionGenerator)) && !t.IsAbstract && t.Namespace == currentNameSpace);
+            foreach (Type t in types)  // iterate over all found subclasses
             {
-                return null;  // let the calling function deal with what happens if there's an unknown oscilloscope plugged in
-            }
-            else
-            {
-                switch (modelString)
+                if (modelString.Equals(t.Name))  // if the name of that subclass matches the model of the function generator found, bingo!
                 {
-                    case "Siglent Technologies,SDG2042X":
-                        return new SDG2042X(VISAID, rm);
-                    default:
-                        throw new ArgumentOutOfRangeException("No instantiation case for function generator " + modelString);
-                        // if we reach this, someone has added an entry to the array of valid scopes but has not added a proper instantiation case here
+                    return (VISAFunctionGenerator)Activator.CreateInstance(t, parameterObject);  // create an instance of the object with the proper
+                                                                                            // constructor and return it
                 }
             }
+            // if there's no matches, then there's a FG connected that doesn't have an associated implementation, so we return null
+            return null;
         }
     }
 }

@@ -6,7 +6,7 @@ using NationalInstruments.Visa;
 
 namespace TestingPlatformLibrary.OscilloscopeAPI
 {
-    public class DS1054Z : VISAOscilloscope
+    public class DS1104Z : VISAOscilloscope
     {
         // for some reason this scope prefers its SCPI commands to be in lowercase form, instead of the usual uppercase versions
         private const int numberOfChannels = 4;  // the rigol 1054z has 4 channels.
@@ -17,7 +17,7 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         private const double voltageOffsetScaleConstant = 8;
         private const double triggerOffsetScaleConstant = 5;
         private const double timeOffsetScaleConstant = 10;
-        private const string ModelString = "RIGOL TECHNOLOGIES,DS1054Z";
+        private const string ModelString = "RIGOL TECHNOLOGIES,DS1104Z";
         private readonly double[] voltageScalePresets = new[] { .01, .02, .05, .1, .2, .5, 1, 2, 5, 10, 20, 50, 100 };
         private readonly string[] voltageScalePresetStrings = new[] {"10mV","20mV", "50mV", "100mV", "200mV",
             "500mV", "1V", "2V", "5V", "10V", "50V", "100V"};
@@ -27,12 +27,11 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         private readonly double[] timeScalePresets = new[] { 0.000000005, 0.000000010, 0.000000020, 0.000000050, 0.000000100,
             0.000000200, 0.000000500, 0.000001000, 0.000002000, 0.000005000, 0.000010000, 0.000020000, 0.00005, 0.00010, 0.00020,
             0.00050, 0.00100, 0.00200, 0.00500, .01, .02, .05, .1, .2, .5, 1, 2, 5, 10, 20, 50};
-        // Need to find a DS1054z that has not had the upgrades installed in order to see what the actual different memory depth ranges are.
-        private readonly int[] channelOneOnlyAllowedMemDepth = new[] { 12000, 120000, 1200000, 12000000};
-        private readonly int[] dualChannelAllowedMemDepth = new[] { 6000, 60000, 600000, 6000000};
-        private readonly int[] threeAndFourChannelAllowedMemDepth = new[] { 3000, 30000, 300000, 3000000};
+        private readonly int[] channelOneOnlyAllowedMemDepth = new[] { 12000, 120000, 1200000, 12000000, 24000000 };
+        private readonly int[] dualChannelAllowedMemDepth = new[] { 6000, 60000, 600000, 6000000, 12000000 };
+        private readonly int[] threeAndFourChannelAllowedMemDepth = new[] { 3000, 30000, 300000, 3000000, 6000000 };
         private readonly HashSet<int> enabledChannels;
-        public DS1054Z(string visaID, ResourceManager rm)
+        public DS1104Z(string visaID, ResourceManager rm)
 
              : base(visaID, rm, numberOfChannels)
         {
