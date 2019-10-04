@@ -29,7 +29,7 @@ namespace TestingPlatformLibrary
         /// even if the device is not connected over a VISA interface. The device must be on and connected for this function to work.
         /// </summary>
         /// <returns>An identification string unique to the device, in the format "<Manufacturer>, <Model>, <Serial_Number>"</returns>
-        /// <exception cref="Exception">thrown if the device is not on or connected</exception>
+        /// <exception cref="Exception">thrown if the device is not on or not connected</exception>
         string GetIdentificationString();
 
         /// <summary>
@@ -41,18 +41,21 @@ namespace TestingPlatformLibrary
         /// <see cref="GetIdentificationString"/> The response string should likely be hard-coded as a constant in the implementation class
         /// </remarks>
         /// <returns>A string which is unique to the manufacturer and model of the instrument</returns>
+        /// <exception cref="Exception">thrown if the device is not on or not connected</exception>
         string GetModelString();
 
         /// <summary>
         /// Returns the way the current device is connected to the computer as a ConnectionType enum.
         /// </summary>
         /// <returns>the way the current device is connected to the computer as a ConnectionType enum</returns>
+        /// <exception cref="Exception">thrown if the device is not on or not connected</exception>
         ConnectionType GetConnectionType();
 
         /// <summary>
         /// Returns the device type of the device as a DeviceType enum.
         /// </summary>
         /// <returns>the device type of the device as a DeviceType enum</returns>
+        /// <exception cref="Exception">thrown if the device is not on or not connected</exception>
         DeviceType GetDeviceType();
 
     }
