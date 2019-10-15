@@ -29,7 +29,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
     public abstract class VISAFunctionGenerator : IFunctionGenerator
     {
         protected readonly string visaID;  // visaID of this function generator.
-        protected readonly ResourceManager rm;  // the resource manager (only one instance per runtime)
+        protected readonly IResourceManager rm;  // the resource manager (only one instance per runtime)
         protected MessageBasedSession mbSession;  // the message session between the computer and the function gen hardware
         protected int numChannels;  // the number of channels that this function generator has
         protected WaitHandle waitHandleIO;
@@ -38,7 +38,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
             // replace this with some sort of reflection based system.
 
         private static readonly object threadLock = new object();
-        protected VISAFunctionGenerator(string visaID, ResourceManager rm, int numChannels)
+        protected VISAFunctionGenerator(string visaID, IResourceManager rm, int numChannels)
         {
             this.visaID = visaID;  // set this visaID to the parameter visaID
             this.rm = rm;  // set the resource manager to the parameter rm.

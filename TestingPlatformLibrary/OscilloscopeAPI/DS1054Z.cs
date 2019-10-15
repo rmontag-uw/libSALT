@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using NationalInstruments.Visa;
+using Ivi.Visa;
 
 namespace TestingPlatformLibrary.OscilloscopeAPI
 {
@@ -32,7 +32,7 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         private readonly int[] dualChannelAllowedMemDepth = new[] { 6000, 60000, 600000, 6000000};
         private readonly int[] threeAndFourChannelAllowedMemDepth = new[] { 3000, 30000, 300000, 3000000};
         private readonly HashSet<int> enabledChannels;
-        public DS1054Z(string visaID, ResourceManager rm)
+        public DS1054Z(string visaID, IResourceManager rm)
 
              : base(visaID, rm, numberOfChannels)
         {
