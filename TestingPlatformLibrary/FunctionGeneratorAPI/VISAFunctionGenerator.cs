@@ -7,20 +7,11 @@ using System.Threading;
 
 namespace TestingPlatformLibrary.FunctionGeneratorAPI
 {
-    /*
-     * This class provides a skeletal implementation of 
-     * the IFunctionGenerator interface to minimize the effort required to implement the interface.
-     * This class covers some of the basic get methods, initialization, and the async read and write.
-     * 
-     * However, it is not required to extend this class to create a valid implementation of IFunctionGenerator.
-     * 
-     * Clients wishing to create a valid implementation of the IMassStorageFunctionGenerator interface can extend this class and then
-     * implement that interface.
-     * 
-     */
+    
     /// <summary>
     ///  This class provides a skeletal implementation of 
     ///  the IFunctionGenerator interface to minimize the effort required to implement the interface.
+    ///  This implementation of the IFunctionGenerator interface uses (and requires) an IVI VISA compliant library in order to function.
     ///  This class covers some of the basic get methods, initialization, and the async read and write.
     ///  However, it is not required to extend this class to create a valid implementation of IFunctionGenerator.
     ///  Clients wishing to create a valid implementation of the IMassStorageFunctionGenerator interface can extend this class and then
@@ -32,12 +23,9 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
         protected readonly IResourceManager rm;  // the resource manager (only one instance per runtime)
         protected IMessageBasedSession mbSession;  // the message session between the computer and the function gen hardware
         protected int numChannels;  // the number of channels that this function generator has
-        protected WaitHandle waitHandleIO;
+        protected WaitHandle waitHandleIO;  // callback stuff
         protected readonly ManualResetEvent manualResetEventIO;
-        private static string[] validFunctionGeneratorModels = new[] { "Siglent Technologies,SDG2042X" };
-            // replace this with some sort of reflection based system.
-
-        private static readonly object threadLock = new object();
+        private static readonly object threadLock = new object();  // for thread locking
         protected VISAFunctionGenerator(string visaID, IResourceManager rm, int numChannels)
         {
             this.visaID = visaID;  // set this visaID to the parameter visaID
