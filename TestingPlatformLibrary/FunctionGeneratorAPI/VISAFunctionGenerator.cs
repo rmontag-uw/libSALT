@@ -7,20 +7,11 @@ using System.Threading;
 
 namespace TestingPlatformLibrary.FunctionGeneratorAPI
 {
-    /*
-     * This class provides a skeletal implementation of 
-     * the IFunctionGenerator interface to minimize the effort required to implement the interface.
-     * This class covers some of the basic get methods, initialization, and the async read and write.
-     * 
-     * However, it is not required to extend this class to create a valid implementation of IFunctionGenerator.
-     * 
-     * Clients wishing to create a valid implementation of the IMassStorageFunctionGenerator interface can extend this class and then
-     * implement that interface.
-     * 
-     */
+    
     /// <summary>
     ///  This class provides a skeletal implementation of 
     ///  the IFunctionGenerator interface to minimize the effort required to implement the interface.
+    ///  This implementation of the IFunctionGenerator interface uses (and requires) an IVI VISA compliant library in order to function.
     ///  This class covers some of the basic get methods, initialization, and the async read and write.
     ///  However, it is not required to extend this class to create a valid implementation of IFunctionGenerator.
     ///  Clients wishing to create a valid implementation of the IMassStorageFunctionGenerator interface can extend this class and then
@@ -29,22 +20,19 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
     public abstract class VISAFunctionGenerator : IFunctionGenerator
     {
         protected readonly string visaID;  // visaID of this function generator.
-        protected readonly ResourceManager rm;  // the resource manager (only one instance per runtime)
-        protected MessageBasedSession mbSession;  // the message session between the computer and the function gen hardware
+        protected readonly IResourceManager rm;  // the resource manager (only one instance per runtime)
+        protected IMessageBasedSession mbSession;  // the message session between the computer and the function gen hardware
         protected int numChannels;  // the number of channels that this function generator has
-        protected WaitHandle waitHandleIO;
+        protected WaitHandle waitHandleIO;  // callback stuff
         protected readonly ManualResetEvent manualResetEventIO;
-        private static string[] validFunctionGeneratorModels = new[] { "Siglent Technologies,SDG2042X" };
-            // replace this with some sort of reflection based system.
-
-        private static readonly object threadLock = new object();
-        protected VISAFunctionGenerator(string visaID, ResourceManager rm, int numChannels)
+        private static readonly object threadLock = new object();  // for thread locking
+        protected VISAFunctionGenerator(string visaID, IResourceManager rm, int numChannels)
         {
             this.visaID = visaID;  // set this visaID to the parameter visaID
             this.rm = rm;  // set the resource manager to the parameter rm.
             manualResetEventIO = new ManualResetEvent(false);  // init the manualResetEvent
             this.numChannels = numChannels;  // set the number of output channels that this function generator has
-            mbSession = (MessageBasedSession)rm.Open(this.visaID);  // open the message session 
+            mbSession = (IMessageBasedSession)rm.Open(this.visaID);  // open the message session 
             // between the computer and the function generator.
         }
 
@@ -423,8 +411,8 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
         public static ConnectedFunctionGeneratorStruct GetConnectedFunctionGenerators()
         {
             IEnumerable<string> resources;
-            ResourceManager rm = new ResourceManager();
-            MessageBasedSession searcherMBS;
+            IResourceManager rm = new ResourceManager();
+            IMessageBasedSession searcherMBS;
             List<string> connectedDeviceModels = new List<string>();  // get a list of connected VISA device model names
             List<string> rawVISAIDs = new List<string>();  // get a list of connect VISA devices' returned IDs
             List<VISAFunctionGenerator> toReturn = new List<VISAFunctionGenerator>();
@@ -436,7 +424,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
                 {
                     rawVISAIDs.Add(s);  // we need to add 
                     string IDNResponse;
-                    searcherMBS = (MessageBasedSession)rm.Open(s);  // open the message session 
+                    searcherMBS = (IMessageBasedSession)rm.Open(s);  // open the message session 
 
                     lock (threadLock)  // since we're doing stuff with I/O we need to use the lock
                     {
@@ -473,7 +461,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
         // and recompile without having to touch anything here.
         // if the modelString parameter is not found in the hardcoded list of valid function generators, this function returns null.
         // All the scopes returned by this function are initialized and ready to be written to/read from
-        private static VISAFunctionGenerator GetDeviceFromModelString(string modelString, string VISAID, ResourceManager rm)
+        private static VISAFunctionGenerator GetDeviceFromModelString(string modelString, string VISAID, IResourceManager rm)
         {
             object[] parameterObject = { VISAID, rm };  // the parameters for all of the VISAFunctionGenerator subclass constructors
             // reflection time

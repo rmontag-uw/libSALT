@@ -1,4 +1,5 @@
 ﻿using NationalInstruments.Visa;
+using Ivi.Visa;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -10,21 +11,21 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
     public abstract class VISAOscilloscope : IOscilloscope
     {
         protected readonly string visaID;  // visaID of this oscilloscope.
-        protected readonly ResourceManager rm;  // the resource manager (only one instance per runtime)
-        protected MessageBasedSession mbSession;  // the message session between the computer and the oscilloscope hardware
+        protected readonly IResourceManager rm;  // the resource manager (only one instance per runtime)
+        protected IMessageBasedSession mbSession;  // the message session between the computer and the oscilloscope hardware
         protected int numChannels;  // the number of channels that this oscilloscope has
         protected WaitHandle waitHandleIO;
         protected readonly ManualResetEvent manualResetEventIO;
         protected static readonly object threadLock = new object();
        // private static readonly string[] validScopeModels = new[] { "RIGOL TECHNOLOGIES,DS1054Z", "RIGOL TECHNOLOGIES,DS1104Z" };  // replace this with some sort of reflection based system.
 
-        protected VISAOscilloscope(string visaID, ResourceManager rm, int numChannels)
+        protected VISAOscilloscope(string visaID, IResourceManager rm, int numChannels)
         {
             this.visaID = visaID;  // set this visaID to the parameter visaID
             this.rm = rm;  // set the resource manager to the parameter rm.
             manualResetEventIO = new ManualResetEvent(false);  // init the manualResetEvent
             this.numChannels = numChannels;  // set the number of output channels that this function generator has
-            mbSession = (MessageBasedSession)rm.Open(this.visaID);  // open the message session 
+            mbSession = (IMessageBasedSession)rm.Open(this.visaID);  // open the message session 
 
             // between the computer and the function generator.
         }
@@ -109,8 +110,8 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         public static ConnectedOscilloscopeStruct GetConnectedOscilloscopes()
         {
             IEnumerable<string> resources;
-            ResourceManager rm = new ResourceManager();
-            MessageBasedSession searcherMBS;
+            IResourceManager rm = new ResourceManager();
+            IMessageBasedSession searcherMBS;
             List<string> connectedDeviceModels = new List<string>();  // a list of the model names of all connected oscilloscopes
             List<string> rawVISAIDs = new List<string>();  // a list of all the raw VISA ids (what i'm calling the responses from .Find())
             List<VISAOscilloscope> toReturn = new List<VISAOscilloscope>();
@@ -122,7 +123,7 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
                 {
                     rawVISAIDs.Add(s);  // we need to add 
                     string IDNResponse;
-                    searcherMBS = (MessageBasedSession)rm.Open(s);  // open the message session 
+                    searcherMBS = (IMessageBasedSession)rm.Open(s);  // open the message session 
 
                     lock (threadLock)  // since we're doing stuff with I/O we need to use the lock
                     {
@@ -155,7 +156,7 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
             }
         }
 
-        private static VISAOscilloscope GetDeviceFromModelString(string modelString, string VISAID, ResourceManager rm)
+        private static VISAOscilloscope GetDeviceFromModelString(string modelString, string VISAID, IResourceManager rm)
         {
             object[] parameterObject = { VISAID, rm };  // the parameters for all of the VISAOscilloscope subclass constructors
             // reflection time

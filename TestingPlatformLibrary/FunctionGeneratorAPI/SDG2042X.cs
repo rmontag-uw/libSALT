@@ -1,4 +1,4 @@
-﻿using NationalInstruments.Visa;
+﻿using Ivi.Visa;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -22,7 +22,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
         private const double minimumSupportedVoltage = -10.0;
         private const int numberOfChannels = 2;  // put this as a const so we don't have magic numbers anywhere
         private const string ModelResponseString = "Siglent Technologies,SDG2042X";
-        public SDG2042X(string visaID, ResourceManager rm) // we take in two arguments here. 
+        public SDG2042X(string visaID, IResourceManager rm) // we take in two arguments here. 
            
            : base(visaID, rm, numberOfChannels)
 
