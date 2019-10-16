@@ -1,5 +1,4 @@
 ﻿using Ivi.Visa;
-using NationalInstruments.Visa;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,6 +31,9 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
             this.numChannels = numChannels;  // set the number of output channels that this function generator has
             mbSession = GlobalResourceManager.Open(this.visaID) as IMessageBasedSession;  // open the message session 
             // between the computer and the function generator.
+            // If the user does not have a valid IVI-VISA compliant implementation on their computer, mbSession ends up being null. We should
+            // check for that, and deal with it accordingly, so we don't end up with random NullReferenceExceptions somewhere down the line.
+
         }
 
         /*
@@ -462,7 +464,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
             }
         }
 
-        // This now uses a reflection based solution yay!
+        // This now uses a reflection based solution as originally planned.
         private static VISAFunctionGenerator GetDeviceFromModelString(string modelString, string VISAID)
         {
             object[] parameterObjects = {VISAID};  // the parameters for all of the VISAFunctionGenerator subclass constructors
