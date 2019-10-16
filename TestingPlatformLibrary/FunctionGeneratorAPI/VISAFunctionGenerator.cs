@@ -20,19 +20,18 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
     public abstract class VISAFunctionGenerator : IFunctionGenerator
     {
         protected readonly string visaID;  // visaID of this function generator.
-        protected readonly IResourceManager rm;  // the resource manager (only one instance per runtime)
+       // protected readonly IResourceManager rm;  // the resource manager (only one instance per runtime)
         protected IMessageBasedSession mbSession;  // the message session between the computer and the function gen hardware
         protected int numChannels;  // the number of channels that this function generator has
         protected WaitHandle waitHandleIO;  // callback stuff
         protected readonly ManualResetEvent manualResetEventIO;
         private static readonly object threadLock = new object();  // for thread locking
-        protected VISAFunctionGenerator(string visaID, IResourceManager rm, int numChannels)
+        protected VISAFunctionGenerator(string visaID, int numChannels)
         {
             this.visaID = visaID;  // set this visaID to the parameter visaID
-            this.rm = rm;  // set the resource manager to the parameter rm.
             manualResetEventIO = new ManualResetEvent(false);  // init the manualResetEvent
             this.numChannels = numChannels;  // set the number of output channels that this function generator has
-            mbSession = (IMessageBasedSession)rm.Open(this.visaID);  // open the message session 
+            mbSession = GlobalResourceManager.Open(this.visaID) as IMessageBasedSession;  // open the message session 
             // between the computer and the function generator.
         }
 
@@ -439,7 +438,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
                 }
                 for (int i = 0; i < connectedDeviceModels.Count; i++)  // connectedDeviceModels.Count() == rawVISAIDs.Count()
                 {
-                    VISAFunctionGenerator temp = GetDeviceFromModelString(connectedDeviceModels[i], rawVISAIDs[i], rm);
+                    VISAFunctionGenerator temp = GetDeviceFromModelString(connectedDeviceModels[i], rawVISAIDs[i]);
                     if (temp == null)
                     {
                         unknownFunctionGeneratorFound = true;  // if there's one 
@@ -461,9 +460,9 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
         // and recompile without having to touch anything here.
         // if the modelString parameter is not found in the hardcoded list of valid function generators, this function returns null.
         // All the scopes returned by this function are initialized and ready to be written to/read from
-        private static VISAFunctionGenerator GetDeviceFromModelString(string modelString, string VISAID, IResourceManager rm)
+        private static VISAFunctionGenerator GetDeviceFromModelString(string modelString, string VISAID)
         {
-            object[] parameterObject = { VISAID, rm };  // the parameters for all of the VISAFunctionGenerator subclass constructors
+            object[] parameterObjects = {VISAID};  // the parameters for all of the VISAFunctionGenerator subclass constructors
             // reflection time
             string currentNameSpace = typeof(VISAFunctionGenerator).Namespace; // get the namespace of this class, all subclasses must be
                                                                           // in the same namespace in order to be found and instantiated via reflection.
@@ -475,7 +474,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
             {
                 if (modelString.Equals(t.Name))  // if the name of that subclass matches the model of the function generator found, bingo!
                 {
-                    return (VISAFunctionGenerator)Activator.CreateInstance(t, parameterObject);  // create an instance of the object with the proper
+                    return (VISAFunctionGenerator)Activator.CreateInstance(t, parameterObjects);  // create an instance of the object with the proper
                                                                                             // constructor and return it
                 }
             }
