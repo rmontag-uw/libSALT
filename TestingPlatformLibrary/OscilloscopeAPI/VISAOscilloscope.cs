@@ -78,7 +78,15 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
 
         public string GetIdentificationString()
         {
-            string response = WriteRawQuery("*IDN?");
+            string response;
+            try
+            {
+                response = WriteRawQuery("*IDN?");
+            }
+            catch(IOTimeoutException e)  // if there's a VISA timeout
+            {
+                throw new InvalidOperationException("VISA Device Timeout",e);
+            }
             string[] tokens = response.Split(',');
             string toReturn = tokens[0] + tokens[1] + tokens[2];
             return toReturn;
