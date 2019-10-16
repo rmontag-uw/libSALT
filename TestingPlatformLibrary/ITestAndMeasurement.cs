@@ -11,6 +11,7 @@ namespace TestingPlatformLibrary
         RAW_SOCKET = 4,
         RAW_USBTMC = 5,
         RAW_SERIAL = 6,
+        OTHER_RESERVED = 7,  // FOR INTERNAL USE ONLY 
     }
 
     public enum DeviceType

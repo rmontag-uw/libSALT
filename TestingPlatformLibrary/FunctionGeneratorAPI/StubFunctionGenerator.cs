@@ -6,7 +6,9 @@ using System.Linq;
 
 namespace TestingPlatformLibrary.FunctionGeneratorAPI
 {
-    /* This class represents a virtualized function generator, a stub. Commands recieved will be written out to a log file.
+    /* The intended purpose of this class is for debugging application code.
+     * 
+     * This class represents a virtualized function generator, a stub. Commands recieved will be written out to a log file.
      * The purpose of this class is to provide a way to test implementations of the function generator interface without requiring
      * an actual function generator to be present for development. Attempting to use an actual function generator's implementation
      * without having it connected will result in errors. This class will not produce those errors.
@@ -26,6 +28,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
      * Data/waveforms uploaded will be stored in bin files, with the name of the memory location in the folder marked  SFG_DATA
      * which will be created in the active directory if it does not exist. These data files will NOT be timestamped and will be
      * overwritten if the user attempts to upload data to them
+     * 
     */
     public class StubFunctionGenerator : IFunctionGenerator
     {
@@ -41,7 +44,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
         private readonly int numMemoryLocations;
         private readonly WaveformParam[] channelWaveData;  // now arrays DO use zero-based indexing so this is gonna be interesting.
 
-        // I'm (probably) not making 16 constructors, if you need something really specific, just use the full one.
+        // I'm not making 16 constructors, if you need something really specific, just use the full one.
         // The default number of channels is 2, and the default number of memory locations is 10.
 
         /// <summary>
