@@ -9,7 +9,8 @@ namespace TestingPlatformLibrary
         VISA_SERIAL = 2,
         VXI_LAN = 3,
         RAW_SOCKET = 4,
-        OTHER_RESERVED = 5
+        RAW_USBTMC = 5,
+        RAW_SERIAL = 6,
     }
 
     public enum DeviceType
@@ -18,7 +19,6 @@ namespace TestingPlatformLibrary
         Oscilloscope = 1,
         Multimeter = 2,
         DC_Power_Supply = 3,
-        OTHER_RESERVED = 4
     }
 
     public interface ITestAndMeasurement

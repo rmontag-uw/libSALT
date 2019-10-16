@@ -1,5 +1,4 @@
-﻿using NationalInstruments.Visa;
-using Ivi.Visa;
+﻿using Ivi.Visa;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -145,7 +144,7 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
                 }
                 return new ConnectedOscilloscopeStruct(toReturn.ToArray(), unknownOscilloscopesFound);
             }
-            catch (Ivi.Visa.NativeVisaException)  // if no devices are found, return a struct with an array of size 0
+            catch (VisaException)  // if no devices are found, return a struct with an array of size 0
             {
                 return new ConnectedOscilloscopeStruct(new VISAOscilloscope[0], false);
             }

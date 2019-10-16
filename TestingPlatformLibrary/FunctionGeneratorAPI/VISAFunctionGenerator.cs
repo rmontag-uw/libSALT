@@ -409,7 +409,6 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
         public static ConnectedFunctionGeneratorStruct GetConnectedFunctionGenerators()
         {
             IEnumerable<string> resources;
-            //IResourceManager rm = new ResourceManager();
             IMessageBasedSession searcherMBS;
             List<string> connectedDeviceModels = new List<string>();  // get a list of connected VISA device model names
             List<string> rawVISAIDs = new List<string>();  // get a list of connect VISA devices' returned IDs
@@ -449,16 +448,13 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
                 }
                 return new ConnectedFunctionGeneratorStruct(toReturn.ToArray(), unknownFunctionGeneratorFound);
             }
-            catch (Ivi.Visa.NativeVisaException)  // if no devices are found, return a struct with an array of size 0
+            catch (VisaException)  // if no devices are found, return a struct with an array of size 0
             {
                 return new ConnectedFunctionGeneratorStruct(new VISAFunctionGenerator[0], false);
             }
         }
 
-        // This should be replaced with some reflection based solution in the future, so that users would just need to drop in their scope implementation
-        // and recompile without having to touch anything here.
-        // if the modelString parameter is not found in the hardcoded list of valid function generators, this function returns null.
-        // All the scopes returned by this function are initialized and ready to be written to/read from
+        // This now uses a reflection based solution yay!
         private static VISAFunctionGenerator GetDeviceFromModelString(string modelString, string VISAID)
         {
             object[] parameterObjects = {VISAID};  // the parameters for all of the VISAFunctionGenerator subclass constructors
