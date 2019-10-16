@@ -411,7 +411,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
         public static ConnectedFunctionGeneratorStruct GetConnectedFunctionGenerators()
         {
             IEnumerable<string> resources;
-            IResourceManager rm = new ResourceManager();
+            //IResourceManager rm = new ResourceManager();
             IMessageBasedSession searcherMBS;
             List<string> connectedDeviceModels = new List<string>();  // get a list of connected VISA device model names
             List<string> rawVISAIDs = new List<string>();  // get a list of connect VISA devices' returned IDs
@@ -419,12 +419,12 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
             bool unknownFunctionGeneratorFound = false;
             try
             {
-                resources = rm.Find("?*");  // find all connected VISA devices
+                resources = GlobalResourceManager.Find("?*");  // find all connected VISA devices
                 foreach (string s in resources)  // after this loop, connectedDeviceModels contains a list of connected devices in the form <Model>
                 {
                     rawVISAIDs.Add(s);  // we need to add 
                     string IDNResponse;
-                    searcherMBS = (IMessageBasedSession)rm.Open(s);  // open the message session 
+                    searcherMBS = GlobalResourceManager.Open(s) as IMessageBasedSession;  // open the message session 
 
                     lock (threadLock)  // since we're doing stuff with I/O we need to use the lock
                     {
