@@ -11,7 +11,6 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
     public abstract class VISAOscilloscope : IOscilloscope
     {
         protected readonly string visaID;  // visaID of this oscilloscope.
-       // protected readonly IResourceManager rm;  // the resource manager (only one instance per runtime)
         protected IMessageBasedSession mbSession;  // the message session between the computer and the oscilloscope hardware
         protected int numChannels;  // the number of channels that this oscilloscope has
         protected WaitHandle waitHandleIO;
@@ -24,8 +23,7 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
             manualResetEventIO = new ManualResetEvent(false);  // init the manualResetEvent
             this.numChannels = numChannels;  // set the number of output channels that this function generator has
             mbSession = GlobalResourceManager.Open(this.visaID) as IMessageBasedSession;  // open the message session 
-
-            // between the computer and the function generator.
+            // between the computer and the oscilloscope.
         }
 
         public int GetNumChannels()
@@ -108,7 +106,6 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         public static ConnectedOscilloscopeStruct GetConnectedOscilloscopes()
         {
             IEnumerable<string> resources;
-            IResourceManager rm = new ResourceManager();
             IMessageBasedSession searcherMBS;
             List<string> connectedDeviceModels = new List<string>();  // a list of the model names of all connected oscilloscopes
             List<string> rawVISAIDs = new List<string>();  // a list of all the raw VISA ids (what i'm calling the responses from .Find())
@@ -116,12 +113,12 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
             bool unknownOscilloscopesFound = false;
             try
             {
-                resources = rm.Find("?*");  // find all connected VISA devices
+                resources = GlobalResourceManager.Find("?*");  // find all connected VISA devices
                 foreach (string s in resources)  // after this loop, connectedDeviceModels contains a list of connected devices in the form <Manufacturer>, <Model>
                 {
                     rawVISAIDs.Add(s);  // we need to add 
                     string IDNResponse;
-                    searcherMBS = (IMessageBasedSession)rm.Open(s);  // open the message session 
+                    searcherMBS = GlobalResourceManager.Open(s) as IMessageBasedSession;  // open the message session 
 
                     lock (threadLock)  // since we're doing stuff with I/O we need to use the lock
                     {
@@ -136,7 +133,7 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
                 }
                 for (int i = 0; i < connectedDeviceModels.Count; i++)  // connectedDeviceModels.Count() == rawVISAIDs.Count()
                 {
-                    VISAOscilloscope temp = GetDeviceFromModelString(connectedDeviceModels[i], rawVISAIDs[i], rm);
+                    VISAOscilloscope temp = GetDeviceFromModelString(connectedDeviceModels[i], rawVISAIDs[i]);
                     if (temp == null)
                     {
                         unknownOscilloscopesFound = true;  // if there's a VISA device found that matches 
@@ -154,9 +151,9 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
             }
         }
 
-        private static VISAOscilloscope GetDeviceFromModelString(string modelString, string VISAID, IResourceManager rm)
+        private static VISAOscilloscope GetDeviceFromModelString(string modelString, string VISAID)
         {
-            object[] parameterObject = { VISAID, rm };  // the parameters for all of the VISAOscilloscope subclass constructors
+            object[] parameterObjects = {VISAID};  // the parameters for all of the VISAOscilloscope subclass constructors
             // reflection time
             string currentNameSpace = typeof(VISAOscilloscope).Namespace; // get the namespace of this class, all subclasses must be
                 // in the same namespace in order to be found and instantiated via reflection.
@@ -168,7 +165,7 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
             {
                 if (modelString.Equals(t.Name))  // if the name of that subclass matches the model of the oscilloscope found, bingo!
                 {
-                    return (VISAOscilloscope) Activator.CreateInstance(t, parameterObject);  // create an instance of the object with the proper
+                    return (VISAOscilloscope) Activator.CreateInstance(t, parameterObjects);  // create an instance of the object with the proper
                         // constructor and return it
                 }
             }
@@ -204,10 +201,6 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         public abstract double GetXIncrement(int channel);
         public abstract double GetXIncrement();
         public abstract double GetYIncrement();
-        //public abstract double GetYOrigin(int channel);
-        //public abstract double GetYOrigin();
-        //public abstract double GetYReference(int channel);
-        //public abstract double GetYReference();
         public abstract double GetXAxisScale();
         public abstract void SetXAxisScale(double timeScale);
         public abstract double GetYAxisOffset(int channel);

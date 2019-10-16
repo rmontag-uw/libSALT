@@ -20,7 +20,6 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
     public abstract class VISAFunctionGenerator : IFunctionGenerator
     {
         protected readonly string visaID;  // visaID of this function generator.
-       // protected readonly IResourceManager rm;  // the resource manager (only one instance per runtime)
         protected IMessageBasedSession mbSession;  // the message session between the computer and the function gen hardware
         protected int numChannels;  // the number of channels that this function generator has
         protected WaitHandle waitHandleIO;  // callback stuff
