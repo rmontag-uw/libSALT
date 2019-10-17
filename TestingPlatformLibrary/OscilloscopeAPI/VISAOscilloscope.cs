@@ -101,10 +101,17 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
             return DeviceType.Oscilloscope;
         }
 
+        /// <summary>
+        /// A struct containing information about connected VISA Oscilloscopes
+        /// </summary>
         public struct ConnectedOscilloscopeStruct
         {
-            public readonly VISAOscilloscope[] connectedOscilloscopes;
-            public readonly bool unknownOscilloscopeConnected;
+            public readonly VISAOscilloscope[] connectedOscilloscopes;  // an array of connected Oscilloscopes, ready for I/O operations when needed.
+            public readonly bool unknownOscilloscopeConnected;  // if this flag is set to true, there is a Oscilloscope connected that there is no
+                // associated implementation for. 
+                //TODO: This always is true when there's a function generator AND and oscilloscope connected, my original plan was to have a way for
+                // applications to tell the user that their scope didn't have an implementation, rather then just crashing or not connecting.
+                // I need to find some way to fix that, for now just ignore this flag in application code.
 
             public ConnectedOscilloscopeStruct(VISAOscilloscope[] connectedOscilloscopes, bool unknownOscilloscopeConnected)
             {
@@ -114,6 +121,16 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
 
         }
 
+        /// <summary>
+        /// Returns a ConnectedOscilloscopeStruct that contains information about the oscilloscopes connected to the system. 
+        /// Only oscilloscopes that can be located by a VISA
+        /// library can be found by this function, e.g. something connected using raw sockets over LAN won't work. 
+        /// </summary>
+        /// <remarks>Look at ConnectedOscilloscopeStruct documentation for additional info.</remarks>
+        /// <returns>a ConnectedOscilloscopeStruct, containing information about connected oscilloscopes</returns>
+        /// <exception cref="System.Runtime.InteropServices.ExternalException">Thrown if the program cannot locate a valid 
+        /// VISA implementation on the system. There are no checked exceptions in C# but please,
+        /// handle this one with a message in ANY application you build with this library.</exception>
         public static ConnectedOscilloscopeStruct GetConnectedOscilloscopes()
         {
             IEnumerable<string> resources;
