@@ -22,7 +22,11 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
             manualResetEventIO = new ManualResetEvent(false);  // init the manualResetEvent
             this.numChannels = numChannels;  // set the number of output channels that this function generator has
             mbSession = GlobalResourceManager.Open(this.visaID) as IMessageBasedSession;  // open the message session 
-            // between the computer and the oscilloscope.
+                                                                                          // between the computer and the oscilloscope.
+
+            // we need to check for VISA library errors here, should we 
+            // throw a specific exception to the application?
+      
         }
 
         public int GetNumChannels()
@@ -99,8 +103,8 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
 
         public struct ConnectedOscilloscopeStruct
         {
-            public VISAOscilloscope[] connectedOscilloscopes;
-            public bool unknownOscilloscopeConnected;
+            public readonly VISAOscilloscope[] connectedOscilloscopes;
+            public readonly bool unknownOscilloscopeConnected;
 
             public ConnectedOscilloscopeStruct(VISAOscilloscope[] connectedOscilloscopes, bool unknownOscilloscopeConnected)
             {
@@ -125,8 +129,23 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
                 {
                     rawVISAIDs.Add(s);  // we need to add 
                     string IDNResponse;
-                    searcherMBS = GlobalResourceManager.Open(s) as IMessageBasedSession;  // open the message session 
+                    try
+                    {
+                        searcherMBS = GlobalResourceManager.Open(s) as IMessageBasedSession;  // open the message session 
+                    }
+                    catch(TypeInitializationException ex)
+                    {
+                        if (ex.InnerException != null && ex.InnerException is DllNotFoundException)  // missing VISA implementation DLL
+                        {
+                            // how will we signal to applications that there's a library missing while still keeping abstraction and other stuff
+                            // we'll let the client deal with it by throwing an ExternalException. 
+                            throw new System.Runtime.InteropServices.ExternalException("Compatible VISA Library not found on System", ex.InnerException);
 
+                            // if it's something else then we need to just throw it again
+                        }
+                        throw ex;
+                    }
+                    
                     lock (threadLock)  // since we're doing stuff with I/O we need to use the lock
                     {
                         searcherMBS.FormattedIO.WriteLine("*IDN?");  // All SCPI compliant devices (and therefore all VISA devices) are required to respond
