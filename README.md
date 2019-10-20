@@ -1,2 +1,2 @@
-# testing-platform-library
-The C# library for the saline tank neural device testing platform 
+# libSALT
+The C# library for the S.A.L.T platform
