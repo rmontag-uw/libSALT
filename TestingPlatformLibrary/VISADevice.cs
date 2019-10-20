@@ -141,20 +141,19 @@ namespace TestingPlatformLibrary
         /// Only devices that can be located by a VISA
         /// library can be found by this function, e.g. something connected using raw sockets over LAN won't work. 
         /// </summary>
-        /// <param name="deviceType">The ITestAndMeasurement device type to search for on the system</param>
         /// <remarks>Look at ConnectedDeviceStruct documentation for additional info.</remarks>
         /// <returns>a ConnectedDeviceStruct, containing information about connected Devices of the passed in device type</returns>
         /// <exception cref="System.Runtime.InteropServices.ExternalException">Thrown if the program cannot locate a valid 
         /// VISA implementation on the system. There are no checked exceptions in C# but please,
         /// handle this one with a message in ANY application you build with this library.</exception>
-        public static ConnectedDeviceStruct GetConnectedFunctionGenerators()
+        public static ConnectedDeviceStruct<T> GetConnectedDevices()
         {
             IEnumerable<string> resources;
             IMessageBasedSession searcherMBS;
             List<string> connectedDeviceModels = new List<string>();  // get a list of connected VISA device model names
             List<string> rawVISAIDs = new List<string>();  // get a list of connect VISA devices' returned IDs
             List<VISAFunctionGenerator> toReturn = new List<VISAFunctionGenerator>();
-            bool unknownFunctionGeneratorFound = false;
+            bool unknownDeviceFound = false;
             try
             {
                 resources = GlobalResourceManager.Find("?*");  // find all connected VISA devices
@@ -177,21 +176,21 @@ namespace TestingPlatformLibrary
                 }
                 for (int i = 0; i < connectedDeviceModels.Count; i++)  // connectedDeviceModels.Count() == rawVISAIDs.Count()
                 {
-                    VISAFunctionGenerator temp = GetDeviceFromModelString(connectedDeviceModels[i], rawVISAIDs[i]);
+                    T temp = GetDeviceFromModelString<T>(connectedDeviceModels[i], rawVISAIDs[i]);
                     if (temp == null)
                     {
-                        unknownFunctionGeneratorFound = true;  // if there's one 
+                        unknownDeviceFound = true;  // if there's one 
                     }
                     else
                     {
                         toReturn.Add(temp);
                     }
                 }
-                return new ConnectedFunctionGeneratorStruct(toReturn.ToArray(), unknownFunctionGeneratorFound);
+                return new ConnectedDeviceStruct(toReturn.ToArray(), unknownDeviceFound);
             }
             catch (VisaException)  // if no devices are found, return a struct with an array of size 0
             {
-                return new ConnectedFunctionGeneratorStruct(new VISAFunctionGenerator[0], false);
+                return new ConnectedDeviceStruct(new T[0], false);
             }
         }
 
@@ -200,7 +199,7 @@ namespace TestingPlatformLibrary
             // returns a instantiated VISADevice object created from its "VISA ID" and
             // its modelString
         {
-            object[] parameterObjects = { VISAID };  // the parameters for all of the VISAOscilloscope subclass constructors
+            object[] parameterObjects = { VISAID };  // the parameters for all of the VISADevice subclass constructors
             // reflection time
             string currentNameSpace = typeof(T).Namespace; // get the namespace of this class, all subclasses must be
                                                            // in the same namespace in order to be found and instantiated via reflection.
