@@ -68,7 +68,7 @@ namespace TestingPlatformLibrary
                 // get the Async result object from the operation
                 waitHandleIO = result.AsyncWaitHandle;  // set the wait handle
                 completed = waitHandleIO.WaitOne(30000);  // wait until the write operation has completed or timed out
-                if (!(completed))  // check to see that the operation completed without timing out.
+                if (!completed)  // check to see that the operation completed without timing out.
                 {
                     throw new TimeoutException();  // if it did time out, throw a timeout exception
                 }
@@ -135,7 +135,6 @@ namespace TestingPlatformLibrary
                 this.unknownDeviceConnected = unknownDeviceConnected;
             }
         }
-
 
         /// <summary>
         /// Returns a ConnectedDevicestruct that contains information about the VISA devices of device type DeviceType.* connected to the system. 
