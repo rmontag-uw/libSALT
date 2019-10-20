@@ -577,6 +577,181 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
             return DeviceType.Function_Generator;
         }
 
+        int IFunctionGenerator.GetNumChannels()
+        {
+            throw new NotImplementedException();
+        }
+
+        double IFunctionGenerator.GetMaxSupportedVoltage()
+        {
+            throw new NotImplementedException();
+        }
+
+        double IFunctionGenerator.GetMinSupportedVoltage()
+        {
+            throw new NotImplementedException();
+        }
+
+        string[] IFunctionGenerator.GetWaveformList()
+        {
+            throw new NotImplementedException();
+        }
+
+        string[] IFunctionGenerator.GetValidMemoryLocations()
+        {
+            throw new NotImplementedException();
+        }
+
+        void IFunctionGenerator.UploadWaveformData(short[] waveData, double sampleRate, double lowLevel, double highLevel, double DCOffset, double phase, string memoryLocation)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IFunctionGenerator.UploadWaveformData(double[] voltageArray, double sampleRate, double DCOffset, double phase, string memoryLocation)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IFunctionGenerator.LoadWaveform(string name, int channel)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IFunctionGenerator.CalibrateWaveform(int channel)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IFunctionGenerator.SetFrequency(double frequency, int channel)
+        {
+            throw new NotImplementedException();
+        }
+
+        double IFunctionGenerator.GetFrequency(int channel)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IFunctionGenerator.SetAmplitude(double amplitude, int channel)
+        {
+            throw new NotImplementedException();
+        }
+
+        double IFunctionGenerator.GetAmplitude(int channel)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IFunctionGenerator.SetDCOffset(double DCOffset, int channel)
+        {
+            throw new NotImplementedException();
+        }
+
+        double IFunctionGenerator.GetDCOffset(int channel)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IFunctionGenerator.SetSampleRate(double sampleRate, int channel)
+        {
+            throw new NotImplementedException();
+        }
+
+        double IFunctionGenerator.GetSampleRate(int channel)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IFunctionGenerator.SetPhase(double phase, int channel)
+        {
+            throw new NotImplementedException();
+        }
+
+        double IFunctionGenerator.GetPhase(int channel)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IFunctionGenerator.SetHighLevel(double highLevel, int channel)
+        {
+            throw new NotImplementedException();
+        }
+
+        double IFunctionGenerator.GetHighLevel(int channel)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IFunctionGenerator.SetLowLevel(double lowLevel, int channel)
+        {
+            throw new NotImplementedException();
+        }
+
+        double IFunctionGenerator.GetLowLevel(int channel)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IFunctionGenerator.SetWaveformType(WaveformType type, int channel)
+        {
+            throw new NotImplementedException();
+        }
+
+        WaveformType IFunctionGenerator.GetWaveformType(int channel)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IFunctionGenerator.StoreAdditionalData(byte[] data, string memoryLocation)
+        {
+            throw new NotImplementedException();
+        }
+
+        byte[] IFunctionGenerator.GetAdditionalData(string memoryLocation)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IFunctionGenerator.SetOutputOn(int channel)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IFunctionGenerator.SetOutputOff(int channel)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IFunctionGenerator.SetAllOutputsOff()
+        {
+            throw new NotImplementedException();
+        }
+
+        string ITestAndMeasurement.GetIdentificationString()
+        {
+            throw new NotImplementedException();
+        }
+
+        string ITestAndMeasurement.GetModelString()
+        {
+            throw new NotImplementedException();
+        }
+
+        void ITestAndMeasurement.Reset()
+        {
+            throw new NotImplementedException();
+        }
+
+        ConnectionType ITestAndMeasurement.GetConnectionType()
+        {
+            throw new NotImplementedException();
+        }
+
+        DeviceType ITestAndMeasurement.GetDeviceType()
+        {
+            throw new NotImplementedException();
+        }
+
         [Serializable()]
         class WaveformParam
         {

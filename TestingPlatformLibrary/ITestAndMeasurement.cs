@@ -45,6 +45,11 @@ namespace TestingPlatformLibrary
         string GetModelString();
 
         /// <summary>
+        /// Resets the instrument to its initial state (if possible).
+        /// </summary>
+        void Reset();
+
+        /// <summary>
         /// Returns the way the current device is connected to the computer as a ConnectionType enum.
         /// </summary>
         /// <remarks>Currently this is more of a future proofing technique than anything remarkable. Results are currently undefined
