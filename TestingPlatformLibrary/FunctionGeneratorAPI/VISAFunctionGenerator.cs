@@ -1,8 +1,6 @@
-﻿using Ivi.Visa;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 
 namespace TestingPlatformLibrary.FunctionGeneratorAPI
 {
@@ -16,24 +14,13 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
     ///  Clients wishing to create a valid implementation of the IMassStorageFunctionGenerator interface can extend this class and then
     ///  implement that interface.
     /// </summary>
-    public abstract class VISAFunctionGenerator : IFunctionGenerator
+    public abstract class VISAFunctionGenerator : VISADevice, IFunctionGenerator
     {
-        protected readonly string visaID;  // visaID of this function generator.
-        protected IMessageBasedSession mbSession;  // the message session between the computer and the function gen hardware
         protected int numChannels;  // the number of channels that this function generator has
-        protected WaitHandle waitHandleIO;  // callback stuff
-        protected readonly ManualResetEvent manualResetEventIO;
-        private static readonly object threadLock = new object();  // for thread locking
         protected VISAFunctionGenerator(string visaID, int numChannels)
+            :base(visaID)
         {
-            this.visaID = visaID;  // set this visaID to the parameter visaID
-            manualResetEventIO = new ManualResetEvent(false);  // init the manualResetEvent
             this.numChannels = numChannels;  // set the number of output channels that this function generator has
-            mbSession = GlobalResourceManager.Open(this.visaID) as IMessageBasedSession;  // open the message session 
-            // between the computer and the function generator.
-            // If the user does not have a valid IVI-VISA compliant implementation on their computer, mbSession ends up being null. We should
-            // check for that, and deal with it accordingly, so we don't end up with random NullReferenceExceptions somewhere down the line.
-
         }
 
         /*
@@ -47,61 +34,6 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
         public int GetNumChannels()
         {
             return numChannels;
-        }
-
-        /*
-         * This function writes the given SCPI command to the function generator
-         * If what you want to send doesn't end with a question mark, send it here.
-         */
-        /// <summary>
-        /// Writes the SCPI command stored in the string to the function generator.
-        /// </summary>
-        /// <param name="command">The SCPI command to write</param>
-        protected void WriteRawCommand(string command)
-        {
-            lock (threadLock)
-            {
-                mbSession.FormattedIO.WriteLine(command);
-            }
-        }
-
-        protected void WriteRawData(byte[] data)
-        {
-            lock (threadLock)
-            {
-                bool completed;
-                IVisaAsyncResult result = mbSession.RawIO.BeginWrite(data, new VisaAsyncCallback(OnWriteComplete), (object)data.Length);
-                // get the Async result object from the operation
-                waitHandleIO = result.AsyncWaitHandle;  // set the wait handle
-                completed = waitHandleIO.WaitOne(30000);  // wait until the write operation has completed or timed out
-                if (!(completed))  // check to see that the operation completed without timing out.
-                {
-                    throw new TimeoutException();  // if it did time out, throw a timeout exception
-                }
-                mbSession.RawIO.EndWrite(result);  // end the write, freeing up system resources.
-            }
-        }
-
-        /*
-         * This function writes the given SCPI query to the function generator, and returns the result.
-         * If what you want to send ends with a question mark, send it here.
-         */
-        /// <summary>
-        /// Writes the given query to the function generator, and returns the response as a string.
-        /// </summary>
-        /// <remarks>Most queries to the Function generator return a string, while commands return nothing, 
-        /// therefore, they must
-        /// be handled separately.It is up to the implementor to handle the two cases.</remarks>
-        /// <param name="query">The query to write to the generator</param>
-        /// <exception cref="Ivi.Visa.IOTimeoutException">Thrown if the query command is invalid</exception>
-        /// <returns>The function generator's response to the given query</returns>
-        protected string WriteRawQuery(string query)
-        {
-            lock (threadLock)
-            {
-                mbSession.FormattedIO.WriteLine(query);
-                return mbSession.FormattedIO.ReadLine();
-            }
         }
 
         /*
@@ -136,14 +68,6 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
                     "The requested output channel does not exist on this function generator. " +
                     "The highest channel on this generator is: " + GetNumChannels() + ", and the channel requested was: " + channel);
             }
-        }
-
-        //helper methods
-
-        private void OnWriteComplete(IVisaAsyncResult result)
-        {
-            manualResetEventIO.Set();  // set the IO manual reset event.
-
         }
 
         /// <summary>
@@ -380,111 +304,10 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
         public abstract void SetOutputOff(int channel);
         public abstract double GetMaxSupportedVoltage();
         public abstract double GetMinSupportedVoltage();
-        public abstract string GetModelString();
-        public abstract ConnectionType GetConnectionType();
 
-        public string GetIdentificationString()
-        {
-            string response;
-            try
-            {
-                response = WriteRawQuery("*IDN?");
-            }
-            catch (IOTimeoutException e)  // if there's a VISA timeout
-            {
-                throw new InvalidOperationException("VISA Device Timeout", e);
-            }
-            string[] tokens = response.Split(',');
-            string toReturn = tokens[0] + tokens[1] + tokens[2];
-            return toReturn;
-        }
-
-        public DeviceType GetDeviceType()
+        public override DeviceType GetDeviceType()
         {
             return DeviceType.Function_Generator;
-        }
-
-        public struct ConnectedFunctionGeneratorStruct
-        {
-            public VISAFunctionGenerator[] connectedFunctionGenerators;
-            public bool unknownFunctionGeneratorConnected;
-
-            public ConnectedFunctionGeneratorStruct(VISAFunctionGenerator[] connectedFunctionGenerators, bool unknownFunctionGeneratorConnected)
-            {
-                this.connectedFunctionGenerators = connectedFunctionGenerators;
-                this.unknownFunctionGeneratorConnected = unknownFunctionGeneratorConnected;
-            }
-
-        }
-        public static ConnectedFunctionGeneratorStruct GetConnectedFunctionGenerators()
-        {
-            IEnumerable<string> resources;
-            IMessageBasedSession searcherMBS;
-            List<string> connectedDeviceModels = new List<string>();  // get a list of connected VISA device model names
-            List<string> rawVISAIDs = new List<string>();  // get a list of connect VISA devices' returned IDs
-            List<VISAFunctionGenerator> toReturn = new List<VISAFunctionGenerator>();
-            bool unknownFunctionGeneratorFound = false;
-            try
-            {
-                resources = GlobalResourceManager.Find("?*");  // find all connected VISA devices
-                foreach (string s in resources)  // after this loop, connectedDeviceModels contains a list of connected devices in the form <Model>
-                {
-                    rawVISAIDs.Add(s);  // we need to add 
-                    string IDNResponse;
-                    searcherMBS = GlobalResourceManager.Open(s) as IMessageBasedSession;  // open the message session 
-
-                    lock (threadLock)  // since we're doing stuff with I/O we need to use the lock
-                    {
-                        searcherMBS.FormattedIO.WriteLine("*IDN?");  // All SCPI compliant devices (and therefore all VISA devices) are required to respond
-                                                                     // to the *IDN? query. 
-                        IDNResponse = searcherMBS.FormattedIO.ReadLine();
-                    }
-                    string[] tokens = IDNResponse.Split(',');   // hopefully this isn't too slow
-                    string formattedIDNString =  tokens[1];  // we run the IDN command on all connected devices
-                                                                              // and then parse the response into the form <Model>
-                    connectedDeviceModels.Add(formattedIDNString);
-                }
-                for (int i = 0; i < connectedDeviceModels.Count; i++)  // connectedDeviceModels.Count() == rawVISAIDs.Count()
-                {
-                    VISAFunctionGenerator temp = GetDeviceFromModelString(connectedDeviceModels[i], rawVISAIDs[i]);
-                    if (temp == null)
-                    {
-                        unknownFunctionGeneratorFound = true;  // if there's one 
-                    }
-                    else
-                    {
-                        toReturn.Add(temp);
-                    }
-                }
-                return new ConnectedFunctionGeneratorStruct(toReturn.ToArray(), unknownFunctionGeneratorFound);
-            }
-            catch (VisaException)  // if no devices are found, return a struct with an array of size 0
-            {
-                return new ConnectedFunctionGeneratorStruct(new VISAFunctionGenerator[0], false);
-            }
-        }
-
-        // This now uses a reflection based solution as originally planned.
-        private static VISAFunctionGenerator GetDeviceFromModelString(string modelString, string VISAID)
-        {
-            object[] parameterObjects = {VISAID};  // the parameters for all of the VISAFunctionGenerator subclass constructors
-            // reflection time
-            string currentNameSpace = typeof(VISAFunctionGenerator).Namespace; // get the namespace of this class, all subclasses must be
-                                                                          // in the same namespace in order to be found and instantiated via reflection.
-            IEnumerable<Type> types = typeof(VISAFunctionGenerator)  // get all (non abstract) subclasses of VISAFunctionGenerator that are located
-                                                                // in the same namespace of VISAFunctionGenerator
-                .Assembly.GetTypes()
-                .Where(t => t.IsSubclassOf(typeof(VISAFunctionGenerator)) && !t.IsAbstract && t.Namespace == currentNameSpace);
-            foreach (Type t in types)  // iterate over all found subclasses
-            {
-                if (modelString.Equals(t.Name))  // if the name of that subclass matches the model of the function generator found, bingo!
-                {
-                    return (VISAFunctionGenerator)Activator.CreateInstance(t, parameterObjects);  // create an instance of the object with the proper
-                                                                                            // constructor and return it
-                }
-            }
-            // if there's no matches, then there's a FG connected that doesn't have an associated implementation, so we return null
-            return null;
         }
     }
 }
