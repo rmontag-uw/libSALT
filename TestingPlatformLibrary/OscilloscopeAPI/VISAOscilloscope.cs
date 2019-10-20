@@ -24,6 +24,11 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
             return DeviceType.Oscilloscope;
         }
 
+        public ConnectedDeviceStruct<VISAOscilloscope> GetConnectedOscilloscopes()
+        {
+            return GetConnectedDevices<VISAOscilloscope>();
+        }
+
         protected void CheckChannelParam(int channel)
         {
             if (channel > GetNumChannels() || channel < 1)  // throw an exception if the channel being asked for is
@@ -34,6 +39,7 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
                     "The highest channel on this scope is: " + GetNumChannels() + ", and the channel requested was: " + channel);
             }
         }
+
         public abstract byte[] GetWaveData(int channel);
         public abstract double[] GetWaveVoltages(int channel);
         public abstract void Run();
