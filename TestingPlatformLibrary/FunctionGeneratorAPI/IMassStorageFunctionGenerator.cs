@@ -32,12 +32,12 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
          * To implement this interface correctly, the parameter ".." must change the working directory to the one above
          * the current directory in the file tree, if one exists. (cd in linux)
          */
-         /// <summary>
-         /// Changes the working directory to the one with the name specified.
-         /// </summary>
-         /// <remarks>".." must change the directory to the parent directory of the current directory, if one exists</remarks>
-         /// <exception cref="System.IO.DirectoryNotFoundException">Thrown if the requested directory does not exist</exception>
-         /// <param name="directoryName">Name of the directory to change to</param>
+        /// <summary>
+        /// Changes the working directory to the one with the name specified.
+        /// </summary>
+        /// <remarks>".." must change the directory to the parent directory of the current directory, if one exists</remarks>
+        /// <exception cref="System.IO.DirectoryNotFoundException">Thrown if the requested directory does not exist</exception>
+        /// <param name="directoryName">Name of the directory to change to</param>
         void ChangeDirectory(string directoryName);
 
         /*
@@ -57,16 +57,16 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
          * throws a FileNotFoundException if the requested file does not exist.
          * throws an ArgumentOutOfRangeException if the requested channel does not exist.
          */
-         /// <summary>
-         /// Loads the waveform data from the file with the name given in the parameter 
-         /// into the given channel's active memory.
-         /// </summary>
-         /// <remarks>The file type is not specified here, it will likely depend on 
-         /// the make/model of the function generator</remarks>
-         /// <exception cref="System.IO.FileNotFoundException">Thrown if the requested file does not exist</exception>
-         /// <exception cref="ArgumentOutOfRangeException">Thrown if the requested channel does not exist</exception>
-         /// <param name="fileName">name of the file to read from</param>
-         /// <param name="channel">channel number to load the waveform to</param>
+        /// <summary>
+        /// Loads the waveform data from the file with the name given in the parameter 
+        /// into the given channel's active memory.
+        /// </summary>
+        /// <remarks>The file type is not specified here, it will likely depend on 
+        /// the make/model of the function generator</remarks>
+        /// <exception cref="System.IO.FileNotFoundException">Thrown if the requested file does not exist</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if the requested channel does not exist</exception>
+        /// <param name="fileName">name of the file to read from</param>
+        /// <param name="channel">channel number to load the waveform to</param>
         void LoadWaveformFromUSB(string fileName, int channel);
 
         /*
