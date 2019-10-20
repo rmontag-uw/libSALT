@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Drawing;
 
-namespace TestingPlatformLibrary.OscilloscopeAPI
+namespace libSALT.OscilloscopeAPI
 {
     public abstract class VISAOscilloscope : VISADevice, IOscilloscope
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TestingPlatformLibrary.FunctionGeneratorAPI
+namespace libSALT.FunctionGeneratorAPI
 {
     /*
      * The IUSBFunctionGenerator Interface provides an interface for function generators that have USB mass storage
