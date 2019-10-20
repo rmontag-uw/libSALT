@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Ivi.Visa;
 
 namespace TestingPlatformLibrary
@@ -11,84 +12,67 @@ namespace TestingPlatformLibrary
     public abstract class VISADevice : ITestAndMeasurement
     {
         protected readonly string visaID;  // visaID of this oscilloscope.
-        protected static readonly Ivi.Visa.Interop.IResourceManager rm = new ResourceManagerClass();  // might only need one of these per runtime
-        protected readonly IFormattedIO488 IOSession;
+        protected IMessageBasedSession mbSession;  // the message session between the computer and the oscilloscope hardware
         private readonly object threadLock;  // each device can have its own I/O thread.
+        private WaitHandle waitHandleIO;  // callback stuff
+        protected readonly ManualResetEvent manualResetEventIO;
         protected VISADevice(string visaID)
         {
             this.visaID = visaID;  // set this visaID to the parameter visaID
-                                   // rm = new ResourceManagerClass();
-            threadLock = new object();
-            IOSession = new FormattedIO488Class
-            {
-                IO = rm.Open(this.visaID) as IMessage  // IOSession.IO
-            };
+            threadLock = new object();  // each device needs its own locking object.
+            manualResetEventIO = new ManualResetEvent(false);  // init the manualResetEvent
+            mbSession = GlobalResourceManager.Open(this.visaID) as IMessageBasedSession;  // open the message session between the computer and the device.
         }
 
-        /// <summary>
-        /// Write a raw SCPI command to the device.
-        /// </summary>
-        /// <param name="command"></param>
-        protected void WriteRawCommand(string command)
-        {
-
-            //lock (threadLock)
-            //{
-            // Console.WriteLine("locked on writeRawCom from " + visaID);
-            IOSession.WriteString(command);
-            //}
-            // Console.WriteLine("unlocked on writeRawCom " + visaID);
-        }
-
-        /// <summary>
-        /// Write a raw SCPI query to the device, and return the response as a string. If it ends with a question mark, send it here
-        /// </summary>
-        /// <remarks>it is up to the implementor to handle the two cases for command vs query</remarks>
-        /// <param name="query">The query to the device</param>
-        /// <exception cref="Ivi.Visa.IOTimeoutException">Thrown if the query command is invalid</exception>
-        /// <returns>The device's response as a string</returns>
-        protected string WriteRawQuery(string query)
+        public void WriteRawCommand(string command)
         {
             lock (threadLock)
             {
-            IOSession.WriteString(query);
+                mbSession.FormattedIO.WriteLine(command);
             }
-            return IOSession.ReadString();
         }
 
-        /// <summary>
-        /// Reads 1024 raw bytes binary data from the device, in response to a query.
-        /// </summary>
-        /// <param name="query">The query for the device to respond to</param>
-        /// <returns>The device's response, in byte[] form</returns>
-        protected byte[] ReadRawData(string query)
-        {
-            return ReadRawData(query, 1024); // if bytesToRead isn't specified, just use 1024 by default. 
-        }
-
-        /// <summary>
-        /// Reads bytesToRead bytes of raw binary data from the device in response to a query
-        /// </summary>
-        /// <param name="query">The query for the device to respond to</param>
-        /// <param name="bytesToRead">The number of bytes to read</param>
-        /// <returns>The device's response in byte[] form</returns>
-        protected byte[] ReadRawData(string query, int bytesToRead)
+        public string WriteRawQuery(string query)
         {
             lock (threadLock)
             {
-            IOSession.WriteString(query);
-            return IOSession.IO.Read(bytesToRead);
+                mbSession.FormattedIO.WriteLine(query);
+                return mbSession.FormattedIO.ReadLine();
             }
         }
 
-        /// <summary>
-        /// Writes a byte array of raw data to the device.
-        /// </summary>
-        /// <param name="data">The byte[] of data to write to the device</param>
+        protected virtual byte[] ReadRawData(string query)
+        {
+            lock (threadLock)
+            {
+                mbSession.FormattedIO.WriteLine(query);
+                return mbSession.RawIO.Read();
+            }
+        }
+
+        protected virtual byte[] ReadRawData(string query, int bytesToRead)
+        {
+            lock (threadLock)
+            {
+                mbSession.FormattedIO.WriteLine(query);
+                return mbSession.RawIO.Read(bytesToRead);
+            }
+        }
+
         protected void WriteRawData(byte[] data)
         {
-            lock (threadLock) { 
-            IOSession.IO.Write(data, data.Length);
+            lock (threadLock)
+            {
+                bool completed;
+                IVisaAsyncResult result = mbSession.RawIO.BeginWrite(data, new VisaAsyncCallback(OnWriteComplete), (object)data.Length);
+                // get the Async result object from the operation
+                waitHandleIO = result.AsyncWaitHandle;  // set the wait handle
+                completed = waitHandleIO.WaitOne(30000);  // wait until the write operation has completed or timed out
+                if (!(completed))  // check to see that the operation completed without timing out.
+                {
+                    throw new TimeoutException();  // if it did time out, throw a timeout exception
+                }
+                mbSession.RawIO.EndWrite(result);  // end the write, freeing up system resources.
             }
         }
 
@@ -98,7 +82,7 @@ namespace TestingPlatformLibrary
         /// <param name="time">The time to set the I/O timeout value to</param>
         protected void SetIOTimeout(int time)
         {
-            IOSession.IO.Timeout = time;
+            mbSession.TimeoutMilliseconds = time;
         }
 
         /// <summary>
@@ -164,47 +148,28 @@ namespace TestingPlatformLibrary
         /// <exception cref="System.Runtime.InteropServices.ExternalException">Thrown if the program cannot locate a valid 
         /// VISA implementation on the system. There are no checked exceptions in C# but please,
         /// handle this one with a message in ANY application you build with this library.</exception>
-        protected static ConnectedDeviceStruct<T> GetConnectectedDevices<T>() where T : VISADevice
+        public static ConnectedDeviceStruct GetConnectedFunctionGenerators()
         {
             IEnumerable<string> resources;
-            Ivi.Visa.Interop.IResourceManager searcherRM = new ResourceManagerClass();   // COM is absolutely dreadful
-            Ivi.Visa.Interop.FormattedIO488 searcherMBS = new FormattedIO488Class();  // I'm going to have to write my own .NET wrapper for the COM visa
-            // because the way this works is just horrible compared to the pure .NET version. 
-            List<string> connectedDeviceModels = new List<string>();  // a list of the model names of all connected oscilloscopes
-            List<string> rawVISAIDs = new List<string>();  // a list of all the raw VISA ids (what i'm calling the responses from .Find())
-            List<T> toReturn = new List<T>();
-            bool unknownDevicesFound = false;
+            IMessageBasedSession searcherMBS;
+            List<string> connectedDeviceModels = new List<string>();  // get a list of connected VISA device model names
+            List<string> rawVISAIDs = new List<string>();  // get a list of connect VISA devices' returned IDs
+            List<VISAFunctionGenerator> toReturn = new List<VISAFunctionGenerator>();
+            bool unknownFunctionGeneratorFound = false;
             try
             {
-                resources = searcherRM.FindRsrc("?*");  // find all connected VISA devices
-                foreach (string s in resources)  // after this loop, connectedDeviceModels contains a list of connected devices in the form <Manufacturer>, <Model>
+                resources = GlobalResourceManager.Find("?*");  // find all connected VISA devices
+                foreach (string s in resources)  // after this loop, connectedDeviceModels contains a list of connected devices in the form <Model>
                 {
                     rawVISAIDs.Add(s);  // we need to add 
                     string IDNResponse;
-                    try
-                    {
-                        searcherMBS.IO = searcherRM.Open(s) as IMessage;
-                    }
-                    catch (TypeInitializationException ex)
-                    {
-                        if (ex.InnerException != null && ex.InnerException is DllNotFoundException)  // missing VISA implementation DLL
-                        {
-                            // how will we signal to applications that there's a library missing while still keeping abstraction and other stuff
-                            // we'll let the client deal with it by throwing an ExternalException. 
-                            throw new System.Runtime.InteropServices.ExternalException("Compatible VISA Library not found on System", ex.InnerException);
+                    searcherMBS = GlobalResourceManager.Open(s) as IMessageBasedSession;  // open the message session 
 
-                            // if it's something else then we need to just throw it again
-                        }
-                        throw ex;
-                    }
-
-                    lock (s)  // since we're doing stuff with I/O we need to use the lock. Since strings in c# are likely aliased, this might give us a little bit of leeway
-                              // if this function was called while an application was still performing I/O operations with a device.
-                              // please don't do that if you don't have to okay.
+                    lock (threadLock)  // since we're doing stuff with I/O we need to use the lock
                     {
-                        searcherMBS.IO.WriteString("*IDN?");  // All SCPI compliant devices (and therefore all VISA devices) are required to respond
-                                                              // to the *IDN? query. 
-                        IDNResponse = searcherMBS.ReadString();
+                        searcherMBS.FormattedIO.WriteLine("*IDN?");  // All SCPI compliant devices (and therefore all VISA devices) are required to respond
+                                                                     // to the *IDN? query. 
+                        IDNResponse = searcherMBS.FormattedIO.ReadLine();
                     }
                     string[] tokens = IDNResponse.Split(',');   // hopefully this isn't too slow
                     string formattedIDNString = tokens[1];  // we run the IDN command on all connected devices
@@ -213,24 +178,21 @@ namespace TestingPlatformLibrary
                 }
                 for (int i = 0; i < connectedDeviceModels.Count; i++)  // connectedDeviceModels.Count() == rawVISAIDs.Count()
                 {
-                    T temp = GetDeviceFromModelString<T>(connectedDeviceModels[i], rawVISAIDs[i]);
+                    VISAFunctionGenerator temp = GetDeviceFromModelString(connectedDeviceModels[i], rawVISAIDs[i]);
                     if (temp == null)
                     {
-                        unknownDevicesFound = true;  // if there's a VISA device found that doesn't match any of our scope implementations
-                                                     // sadly for us, function generators and other VISA devices are located, and then flagged as unknown. I'll look into if fixing this is even possible.
-                                                     // it's only purpose is to help users debug. It might not be obvious that each scope needs its own implementation, and just having nothing show up could be a sign
-                                                     // of a protocol or VISA error, and providing distinction would be nice.
+                        unknownFunctionGeneratorFound = true;  // if there's one 
                     }
                     else
                     {
                         toReturn.Add(temp);
                     }
                 }
-                return new ConnectedDeviceStruct<T>(toReturn.ToArray(), unknownDevicesFound);
+                return new ConnectedFunctionGeneratorStruct(toReturn.ToArray(), unknownFunctionGeneratorFound);
             }
-            catch (Exception ex) when (ex is VisaException || ex is System.Runtime.InteropServices.COMException)  // if no devices are found, return a struct with an array of size 0
+            catch (VisaException)  // if no devices are found, return a struct with an array of size 0
             {
-                return new ConnectedDeviceStruct<T>(new T[0], false);
+                return new ConnectedFunctionGeneratorStruct(new VISAFunctionGenerator[0], false);
             }
         }
 
@@ -257,6 +219,11 @@ namespace TestingPlatformLibrary
             }
             // if there's no matches, then there's a device connected that doesn't have an associated implementation, so we return null
             return null;
+        }
+        private void OnWriteComplete(IVisaAsyncResult result)
+        {
+            manualResetEventIO.Set();  // set the IO manual reset event.
+
         }
     }
 }

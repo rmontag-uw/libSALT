@@ -12,14 +12,11 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         protected readonly string visaID;  // visaID of this oscilloscope.
         protected IMessageBasedSession mbSession;  // the message session between the computer and the oscilloscope hardware
         protected int numChannels;  // the number of channels that this oscilloscope has
-        protected WaitHandle waitHandleIO;
-        protected readonly ManualResetEvent manualResetEventIO;
         protected static readonly object threadLock = new object();
 
         protected VISAOscilloscope(string visaID, int numChannels)
         {
             this.visaID = visaID;  // set this visaID to the parameter visaID
-            manualResetEventIO = new ManualResetEvent(false);  // init the manualResetEvent
             this.numChannels = numChannels;  // set the number of output channels that this function generator has
             mbSession = GlobalResourceManager.Open(this.visaID) as IMessageBasedSession;  // open the message session 
                                                                                           // between the computer and the oscilloscope.
