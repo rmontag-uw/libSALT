@@ -377,5 +377,13 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         /// </summary>
         /// <returns>The number of horizontal divisions of the oscilloscope</returns>
         int GetNumHorizontalDivisions();
+
+        /// <summary>
+        /// Returns the ideal number of osciilscope points captured from the screen for updating remote displays. For example, this value is 1200 on the
+        /// Rigol DS1054z. If an oscilloscope does not have this sort of feature, this function returns -1. 
+        /// This value should likely be a constant in a implementation class, it should never change during runtime.
+        /// </summary>
+        /// <returns>The ideal number of oscilloscope points captured from the screen</returns>
+        int GetNumPointsPerScreenCapture();
     }
 }

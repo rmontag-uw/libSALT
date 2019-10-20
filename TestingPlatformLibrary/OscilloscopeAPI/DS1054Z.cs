@@ -18,6 +18,7 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         private const double timeOffsetScaleConstant = 10;
         private const int numVerticalDivisions = 8;
         private const int numHorizontalDivisions = 12;
+        private const int numPointsPerScreen = 1200;
         private const string ModelString = "RIGOL TECHNOLOGIES,DS1054Z";
         private readonly double[] voltageScalePresets = new[] { .01, .02, .05, .1, .2, .5, 1, 2, 5, 10, 20, 50, 100 };
         private readonly string[] voltageScalePresetStrings = new[] {"10mV","20mV", "50mV", "100mV", "200mV",
@@ -464,6 +465,11 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         public override int GetNumHorizontalDivisions()
         {
             return numHorizontalDivisions;
+        }
+
+        public override int GetNumPointsPerScreenCapture()
+        {
+            return numPointsPerScreen;
         }
     }
 }

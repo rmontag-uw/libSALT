@@ -150,7 +150,7 @@ namespace TestingPlatformLibrary
         /// <exception cref="System.Runtime.InteropServices.ExternalException">Thrown if the program cannot locate a valid 
         /// VISA implementation on the system. There are no checked exceptions in C# but please,
         /// handle this one with a message in ANY application you build with this library.</exception>
-        public static ConnectedDeviceStruct<T> GetConnectedDevices<T>() where T : VISADevice
+        public static ConnectedDeviceStruct<T> GetConnectedDevices<T>() where T : VISADevice, ITestAndMeasurement
         {
             IEnumerable<string> resources;
             IMessageBasedSession searcherMBS;
@@ -193,7 +193,7 @@ namespace TestingPlatformLibrary
             }
         }
 
-        private static T GetDeviceFromModelString<T>(string modelString, string VISAID) where T : VISADevice
+        private static T GetDeviceFromModelString<T>(string modelString, string VISAID) where T : VISADevice, ITestAndMeasurement
 
             // returns a instantiated VISADevice object created from its "VISA ID" and
             // its modelString
