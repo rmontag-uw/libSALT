@@ -140,19 +140,20 @@ namespace TestingPlatformLibrary
         /// Returns a ConnectedDevicestruct that contains information about the VISA devices of device type DeviceType.* connected to the system. 
         /// Only devices that can be located by a VISA
         /// library can be found by this function, e.g. something connected using raw sockets over LAN won't work. 
+        /// NOT THREAD SAFE. This is best used before any regular I/O transfer has started in your program.
         /// </summary>
         /// <remarks>Look at ConnectedDeviceStruct documentation for additional info.</remarks>
         /// <returns>a ConnectedDeviceStruct, containing information about connected Devices of the passed in device type</returns>
         /// <exception cref="System.Runtime.InteropServices.ExternalException">Thrown if the program cannot locate a valid 
         /// VISA implementation on the system. There are no checked exceptions in C# but please,
         /// handle this one with a message in ANY application you build with this library.</exception>
-        public static ConnectedDeviceStruct<T> GetConnectedDevices()
+        public static ConnectedDeviceStruct<T> GetConnectedDevices<T>() where T : VISADevice
         {
             IEnumerable<string> resources;
             IMessageBasedSession searcherMBS;
             List<string> connectedDeviceModels = new List<string>();  // get a list of connected VISA device model names
             List<string> rawVISAIDs = new List<string>();  // get a list of connect VISA devices' returned IDs
-            List<VISAFunctionGenerator> toReturn = new List<VISAFunctionGenerator>();
+            List<T> toReturn = new List<T>();
             bool unknownDeviceFound = false;
             try
             {
@@ -162,13 +163,8 @@ namespace TestingPlatformLibrary
                     rawVISAIDs.Add(s);  // we need to add 
                     string IDNResponse;
                     searcherMBS = GlobalResourceManager.Open(s) as IMessageBasedSession;  // open the message session 
-
-                    lock (threadLock)  // since we're doing stuff with I/O we need to use the lock
-                    {
-                        searcherMBS.FormattedIO.WriteLine("*IDN?");  // All SCPI compliant devices (and therefore all VISA devices) are required to respond
-                                                                     // to the *IDN? query. 
-                        IDNResponse = searcherMBS.FormattedIO.ReadLine();
-                    }
+                    searcherMBS.FormattedIO.WriteLine("*IDN?");  // All SCPI compliant devices (and therefore all VISA devices) are required to respon to *IDN?
+                    IDNResponse = searcherMBS.FormattedIO.ReadLine();
                     string[] tokens = IDNResponse.Split(',');   // hopefully this isn't too slow
                     string formattedIDNString = tokens[1];  // we run the IDN command on all connected devices
                                                             // and then parse the response into the form <Model>
@@ -186,11 +182,11 @@ namespace TestingPlatformLibrary
                         toReturn.Add(temp);
                     }
                 }
-                return new ConnectedDeviceStruct(toReturn.ToArray(), unknownDeviceFound);
+                return new ConnectedDeviceStruct<T>(toReturn.ToArray(), unknownDeviceFound);
             }
             catch (VisaException)  // if no devices are found, return a struct with an array of size 0
             {
-                return new ConnectedDeviceStruct(new T[0], false);
+                return new ConnectedDeviceStruct<T>(new T[0], false);
             }
         }
 
@@ -218,7 +214,7 @@ namespace TestingPlatformLibrary
             // if there's no matches, then there's a device connected that doesn't have an associated implementation, so we return null
             return null;
         }
-        private void OnWriteComplete(IVisaAsyncResult result)
+        private void OnWriteComplete(IVisaAsyncResult result)  // for callbacks on data writing
         {
             manualResetEventIO.Set();  // set the IO manual reset event.
 
