@@ -52,7 +52,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
         /// </summary>
         /// <remarks> I'm (probably) not making 16 constructors, if you need something really specific, just use the full one. 
         /// The default number of channels is 2, and the default number of memory locations is 10.</remarks>
-        public StubFunctionGenerator() : this(Directory.GetCurrentDirectory(), false, defaultNumMemoryLocations ,defaultNumChannels) { }
+        public StubFunctionGenerator() : this(Directory.GetCurrentDirectory(), false, defaultNumMemoryLocations, defaultNumChannels) { }
 
         /// <summary>
         /// The constructor that takes in a number of memory locations that the client wants the stub function generator to have
@@ -81,7 +81,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
         /// same as calling the default constructor
         /// </summary>
         /// <param name="timeStampedLogFiles"></param>
-        public StubFunctionGenerator(bool timeStampedLogFiles) : this(Directory.GetCurrentDirectory(),timeStampedLogFiles, defaultNumMemoryLocations, defaultNumChannels) { }
+        public StubFunctionGenerator(bool timeStampedLogFiles) : this(Directory.GetCurrentDirectory(), timeStampedLogFiles, defaultNumMemoryLocations, defaultNumChannels) { }
 
         /// <summary>
         /// The two argument constructor. Creates a StubFunctionGenerator object with log files saved in the given directory path
@@ -96,7 +96,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
             channelWaveData = new WaveformParam[numChannels];  // init with a length of however many channels there are.
             string filePath;
             this.directoryPath = directoryPath;  // set the directory to write log files to.
-            
+
             if (timeStampedLogFiles)  // create a file with a timestamp in the name
             {
                 string timeStamp = string.Format("{0:yyyy-MM-dd_hh-mm-ss-fff}", DateTime.Now);  // get the current time and
@@ -113,9 +113,9 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
             {
                 File.Delete(filePath);  // delete it
             }
-            
+
             //File.Create(filePath);  // then init the filestream after creating the new file
-            using (StreamWriter streamWriter = new StreamWriter(filePath,true))
+            using (StreamWriter streamWriter = new StreamWriter(filePath, true))
             {
 
                 streamWriter.WriteLine("StubFunctionGenerator log file, generated at "
@@ -126,7 +126,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
             {
                 validMemLocations.Add("WAVE" + i);
             }
-            for(int i = 0; i < numChannels; i++)
+            for (int i = 0; i < numChannels; i++)
             {
                 channelWaveData[i] = new WaveformParam();
             }
@@ -138,19 +138,19 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
         public void CalibrateWaveform(int channel)
         {
             Console.WriteLine("Calibrating");
-            using (StreamWriter streamWriter = new StreamWriter(filePath,true))
+            using (StreamWriter streamWriter = new StreamWriter(filePath, true))
             {
 
                 streamWriter.WriteLine("CalibrateWaveform(" + channel + ") "
                         + string.Format("{0:yyyy-MM-dd_hh-mm-ss-fff}", DateTime.Now));
             }
-            
-            
+
+
         }
 
         public byte[] GetAdditionalData(string memoryLocation)
         {
-            using (StreamWriter streamWriter = new StreamWriter(this.filePath,true))
+            using (StreamWriter streamWriter = new StreamWriter(this.filePath, true))
             {
                 streamWriter.WriteLine("GetAdditionalData(" + memoryLocation + ") "
                         + string.Format("{0:yyyy-MM-dd_hh-mm-ss-fff}", DateTime.Now));
@@ -164,18 +164,18 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
         {
             // gonna have to do channelWaveData[channel-1] for these because of how arrays are zero based indexed, while
             // FG channels are NOT.
-            using (StreamWriter streamWriter = new StreamWriter(filePath,true))
+            using (StreamWriter streamWriter = new StreamWriter(filePath, true))
             {
                 streamWriter.WriteLine("GetAmplitude(" + channel + ") "
                         + string.Format("{0:yyyy-MM-dd_hh-mm-ss-fff}", DateTime.Now));
-                streamWriter.WriteLine("Amplitude of channel " + channel + " is " + channelWaveData[channel-1].amplitude);
+                streamWriter.WriteLine("Amplitude of channel " + channel + " is " + channelWaveData[channel - 1].amplitude);
             }
             return channelWaveData[channel - 1].amplitude;
         }
 
         public double GetDCOffset(int channel)
         {
-            using (StreamWriter streamWriter = new StreamWriter(filePath,true))
+            using (StreamWriter streamWriter = new StreamWriter(filePath, true))
             {
                 streamWriter.WriteLine("GetDCOffset(" + channel + ") "
                         + string.Format("{0:yyyy-MM-dd_hh-mm-ss-fff}", DateTime.Now));
@@ -186,7 +186,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
 
         public double GetFrequency(int channel)
         {
-            using (StreamWriter streamWriter = new StreamWriter(filePath,true))
+            using (StreamWriter streamWriter = new StreamWriter(filePath, true))
             {
                 streamWriter.WriteLine("GetFrequency(" + channel + ") "
                         + string.Format("{0:yyyy-MM-dd_hh-mm-ss-fff}", DateTime.Now));
@@ -197,7 +197,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
 
         public double GetHighLevel(int channel)
         {
-            using (StreamWriter streamWriter = new StreamWriter(filePath,true))
+            using (StreamWriter streamWriter = new StreamWriter(filePath, true))
             {
                 streamWriter.WriteLine("GetHighLevel(" + channel + ") "
                         + string.Format("{0:yyyy-MM-dd_hh-mm-ss-fff}", DateTime.Now));
@@ -208,7 +208,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
 
         public double GetLowLevel(int channel)
         {
-            using (StreamWriter streamWriter = new StreamWriter(filePath,true))
+            using (StreamWriter streamWriter = new StreamWriter(filePath, true))
             {
                 streamWriter.WriteLine("GetLowLevel(" + channel + ") "
                         + string.Format("{0:yyyy-MM-dd_hh-mm-ss-fff}", DateTime.Now));
@@ -230,7 +230,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
 
         public double GetPhase(int channel)
         {
-            using (StreamWriter streamWriter = new StreamWriter(filePath,true))
+            using (StreamWriter streamWriter = new StreamWriter(filePath, true))
             {
                 streamWriter.WriteLine("GetPhase(" + channel + ") "
                         + string.Format("{0:yyyy-MM-dd_hh-mm-ss-fff}", DateTime.Now));
@@ -241,7 +241,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
 
         public double GetSampleRate(int channel)
         {
-            using (StreamWriter streamWriter = new StreamWriter(filePath,true))
+            using (StreamWriter streamWriter = new StreamWriter(filePath, true))
             {
                 streamWriter.WriteLine("GetSampleRate(" + channel + ") "
                         + string.Format("{0:yyyy-MM-dd_hh-mm-ss-fff}", DateTime.Now));
@@ -256,7 +256,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
             {
                 streamWriter.WriteLine("GetValidMemoryLocations() "
                         + string.Format("{0:yyyy-MM-dd_hh-mm-ss-fff}", DateTime.Now));
-                
+
             }
             return validMemLocations.ToArray();
         }
@@ -274,7 +274,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
 
         public WaveformType GetWaveformType(int channel)
         {
-            using (StreamWriter streamWriter = new StreamWriter(filePath,true))
+            using (StreamWriter streamWriter = new StreamWriter(filePath, true))
             {
                 streamWriter.WriteLine("GetWaveformType(" + channel + ") "
                         + string.Format("{0:yyyy-MM-dd_hh-mm-ss-fff}", DateTime.Now));
@@ -285,9 +285,9 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
 
         public void LoadWaveform(string name, int channel)
         {
-            using (StreamWriter streamWriter = new StreamWriter(this.filePath,true))
+            using (StreamWriter streamWriter = new StreamWriter(this.filePath, true))
             {
-                streamWriter.WriteLine("LoadWaveform(" + name + ", "+ channel + ") "
+                streamWriter.WriteLine("LoadWaveform(" + name + ", " + channel + ") "
                         + string.Format("{0:yyyy-MM-dd_hh-mm-ss-fff}", DateTime.Now));
             }
             string filePath = directoryPath + "\\SFG_DATA\\" + name + ".bin";  // the path to where the memory location's
@@ -307,7 +307,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
 
         public void SetAllOutputsOff()
         {
-            using (StreamWriter streamWriter = new StreamWriter(filePath,true))
+            using (StreamWriter streamWriter = new StreamWriter(filePath, true))
             {
                 streamWriter.WriteLine("SetAllOutputsOff() "
                         + string.Format("{0:yyyy-MM-dd_hh-mm-ss-fff}", DateTime.Now));
@@ -316,17 +316,17 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
 
         public void SetAmplitude(double amplitude, int channel)
         {
-            using (StreamWriter streamWriter = new StreamWriter(filePath,true))
+            using (StreamWriter streamWriter = new StreamWriter(filePath, true))
             {
                 streamWriter.WriteLine("SetAmplitude(" + amplitude + ", " + channel + ") "  // can't forget that space
                         + string.Format("{0:yyyy-MM-dd_hh-mm-ss-fff}", DateTime.Now));
             }
-            channelWaveData[channel - 1].amplitude  = amplitude;
+            channelWaveData[channel - 1].amplitude = amplitude;
         }
 
         public void SetDCOffset(double DCOffset, int channel)
         {
-            using (StreamWriter streamWriter = new StreamWriter(filePath,true))
+            using (StreamWriter streamWriter = new StreamWriter(filePath, true))
             {
                 streamWriter.WriteLine("SetDCOffset(" + DCOffset + ", " + channel + ") "  // can't forget that space
                         + string.Format("{0:yyyy-MM-dd_hh-mm-ss-fff}", DateTime.Now));
@@ -336,7 +336,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
 
         public void SetFrequency(double frequency, int channel)
         {
-            using (StreamWriter streamWriter = new StreamWriter(filePath,true))
+            using (StreamWriter streamWriter = new StreamWriter(filePath, true))
             {
                 streamWriter.WriteLine("SetFrequency(" + frequency + ", " + channel + ") "  // can't forget that space
                         + string.Format("{0:yyyy-MM-dd_hh-mm-ss-fff}", DateTime.Now));
@@ -346,7 +346,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
 
         public void SetHighLevel(double highLevel, int channel)
         {
-            using (StreamWriter streamWriter = new StreamWriter(filePath,true))
+            using (StreamWriter streamWriter = new StreamWriter(filePath, true))
             {
                 streamWriter.WriteLine("SetHighLevel(" + highLevel + ", " + channel + ") "  // can't forget that space
                         + string.Format("{0:yyyy-MM-dd_hh-mm-ss-fff}", DateTime.Now));
@@ -356,7 +356,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
 
         public void SetLowLevel(double lowLevel, int channel)
         {
-            using (StreamWriter streamWriter = new StreamWriter(filePath,true))
+            using (StreamWriter streamWriter = new StreamWriter(filePath, true))
             {
                 streamWriter.WriteLine("SetLowLevel(" + lowLevel + ", " + channel + ") "  // can't forget that space
                         + string.Format("{0:yyyy-MM-dd_hh-mm-ss-fff}", DateTime.Now));
@@ -366,16 +366,16 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
 
         public void SetOutputOff(int channel)
         {
-            using (StreamWriter streamWriter = new StreamWriter(filePath,true))
+            using (StreamWriter streamWriter = new StreamWriter(filePath, true))
             {
-                streamWriter.WriteLine("SetOutputOff("+ channel + ") "  // can't forget that space
+                streamWriter.WriteLine("SetOutputOff(" + channel + ") "  // can't forget that space
                         + string.Format("{0:yyyy-MM-dd_hh-mm-ss-fff}", DateTime.Now));
             }
         }
 
         public void SetOutputOn(int channel)
         {
-            using (StreamWriter streamWriter = new StreamWriter(filePath,true))
+            using (StreamWriter streamWriter = new StreamWriter(filePath, true))
             {
                 streamWriter.WriteLine("SetOutputOn(" + channel + ") "  // can't forget that space
                         + string.Format("{0:yyyy-MM-dd_hh-mm-ss-fff}", DateTime.Now));
@@ -384,7 +384,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
 
         public void SetPhase(double phase, int channel)
         {
-            using (StreamWriter streamWriter = new StreamWriter(filePath,true))
+            using (StreamWriter streamWriter = new StreamWriter(filePath, true))
             {
                 streamWriter.WriteLine("SetPhase(" + phase + ", " + channel + ") "  // can't forget that space
                         + string.Format("{0:yyyy-MM-dd_hh-mm-ss-fff}", DateTime.Now));
@@ -394,7 +394,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
 
         public void SetSampleRate(double sampleRate, int channel)
         {
-            using (StreamWriter streamWriter = new StreamWriter(filePath,true))
+            using (StreamWriter streamWriter = new StreamWriter(filePath, true))
             {
                 streamWriter.WriteLine("SetSampleRate(" + sampleRate + ", " + channel + ") "  // can't forget that space
                         + string.Format("{0:yyyy-MM-dd_hh-mm-ss-fff}", DateTime.Now));
@@ -404,7 +404,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
 
         public void SetWaveformType(WaveformType type, int channel)
         {
-            using (StreamWriter streamWriter = new StreamWriter(filePath,true))
+            using (StreamWriter streamWriter = new StreamWriter(filePath, true))
             {
                 streamWriter.WriteLine("SetWaveformType(" + type.ToString() + ", " + channel + ") "  // can't forget that space
                         + string.Format("{0:yyyy-MM-dd_hh-mm-ss-fff}", DateTime.Now));
@@ -414,22 +414,22 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
 
         public void StoreAdditionalData(byte[] data, string memoryLocation)
         {
-            using (StreamWriter streamWriter = new StreamWriter(this.filePath,true))
+            using (StreamWriter streamWriter = new StreamWriter(this.filePath, true))
             {
-                streamWriter.WriteLine("StoreAdditionalData(data, " + memoryLocation+") "  // can't forget that space
+                streamWriter.WriteLine("StoreAdditionalData(data, " + memoryLocation + ") "  // can't forget that space
                         + string.Format("{0:yyyy-MM-dd_hh-mm-ss-fff}", DateTime.Now));
             }
             string dataDirectory = directoryPath + "\\SFG_DATA";  // set directory path
             Directory.CreateDirectory(dataDirectory);  // creates the directory if it doesn't exist, and does nothing otherwise.
             string filePath = dataDirectory + "\\" + memoryLocation + "_DATA.bin";  // set file path
-            File.WriteAllBytes(filePath,data);  // overwrites if the file is already there, and creates one if it is not.
+            File.WriteAllBytes(filePath, data);  // overwrites if the file is already there, and creates one if it is not.
             // that's what we want!
 
         }
 
         public void UploadWaveformData(short[] waveData, double sampleRate, double lowLevel, double highLevel, double DCOffset, double phase, string memoryLocation)
         {
-            using (StreamWriter streamWriter = new StreamWriter(this.filePath,true))
+            using (StreamWriter streamWriter = new StreamWriter(this.filePath, true))
             {
                 streamWriter.WriteLine("UploadWaveformData(short[] waveData, " + memoryLocation + ", " + sampleRate + ", " +
                     lowLevel + ", " + highLevel + ", " + DCOffset + ", " + phase + ", " + memoryLocation + ") "  // can't forget that space
@@ -464,7 +464,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
         {
             double lowLevel = voltageArray.Min();
             double highLevel = voltageArray.Max();
-            using (StreamWriter streamWriter = new StreamWriter(this.filePath,true))
+            using (StreamWriter streamWriter = new StreamWriter(this.filePath, true))
             {
                 streamWriter.WriteLine("UploadWaveformData(double[] voltageArray, " + memoryLocation + ", " + sampleRate + ", " +
                     lowLevel + ", " + highLevel + ", " + DCOffset + ", " + phase + ", " + memoryLocation + ") "  // can't forget that space
@@ -499,9 +499,9 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
             // layer of the interface, and exist because function generators can be weird, and hell, might even be removed
             // in some version of the interface, clearly writing an SCPI command to something like this isn't going to actually
             // do the thing that you want. I'm not writing an SCPI emulator here (that'd be interesting though)
-            using (StreamWriter streamWriter = new StreamWriter(filePath,true))
+            using (StreamWriter streamWriter = new StreamWriter(filePath, true))
             {
-                streamWriter.WriteLine("WriteRawCommand("+command +") "  // can't forget that space
+                streamWriter.WriteLine("WriteRawCommand(" + command + ") "  // can't forget that space
                         + string.Format("{0:yyyy-MM-dd_hh-mm-ss-fff}", DateTime.Now));
             }
         }
@@ -517,16 +517,17 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
             // these don't do anything. The "*IDN?" query is quite common. Luckily, if I do end up removing these from the interface,
             // nothing breaks here because it's not extending an abstract class. These will simply become class only methods.
             // But yes, "*IDN?" does work.
-            using (StreamWriter streamWriter = new StreamWriter(filePath,true))
+            using (StreamWriter streamWriter = new StreamWriter(filePath, true))
             {
                 streamWriter.WriteLine("WriteRawQuery(" + query + ") "  // can't forget that space
                         + string.Format("{0:yyyy-MM-dd_hh-mm-ss-fff}", DateTime.Now));
             }
-            if(query.ToUpper() == "*IDN?" || query.ToUpper() == "IDN?")
+            if (query.ToUpper() == "*IDN?" || query.ToUpper() == "IDN?")
             {
                 return "BRL Technologies,RM-2048X,CSE08092003PAllen,0.123-09.27.2017-1.33-77-00";  // return a SCPI '99 complient
                 // identification string
-            } else
+            }
+            else
             {
                 return "response";  // don't return an empty string as it could possibly break something
             }

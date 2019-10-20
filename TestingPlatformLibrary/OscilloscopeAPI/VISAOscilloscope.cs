@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 
 namespace TestingPlatformLibrary.OscilloscopeAPI
 {
@@ -11,7 +9,7 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         protected static readonly object threadLock = new object();
 
         protected VISAOscilloscope(string visaID, int numChannels)
-            :base(visaID)
+            : base(visaID)
         {
             this.numChannels = numChannels;  // set the number of output channels that this function generator has
         }

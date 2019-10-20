@@ -23,13 +23,13 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
         private const string ModelResponseString = "Siglent Technologies,SDG2042X";
 
         public SDG2042X(string visaID) // we take in two arguments here. 
-           
+
            : base(visaID, numberOfChannels)
 
         {
             //WriteRawCommand("*ESE 1");  // flag the event status register
             validMemLocations = new List<string>();  // guess we don't use ArrayList in C#
-            for(int i = 1; i <= numOfWaveFormsAllowed; i++)  // WAVE1-WAVE(whatever), no zero based indexing
+            for (int i = 1; i <= numOfWaveFormsAllowed; i++)  // WAVE1-WAVE(whatever), no zero based indexing
             {
                 validMemLocations.Add("WAVE" + i);
             }
@@ -63,11 +63,11 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
         public override void LoadWaveform(string name, int channel)
         {
             CheckChannelParam(channel);  // check for valid channel
-            mbSession.TimeoutMilliseconds = 30000;  // increase timeout to 30 seconds
+            SetIOTimeout(30000);  // increase timeout to 30 seconds
             //C2:SRATE MODE,TARB
             WriteRawCommand("C" + channel + ":SRATE MODE,TARB");  // set the generator to truarb mode before loading files
             if (!Array.Exists(GetValidMemoryLocations(), element => element.Equals(name)))  // check to see if the requested memory
-                // location exists or not
+                                                                                            // location exists or not
             {  // if it doesn't exist
                 throw new FileNotFoundException(name + "does not exist in memory");  // throw a FileNotFoundException
             }
@@ -75,13 +75,13 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
             WriteRawCommand("*CLS");  // clear status
             WriteRawCommand("*OPC");  // wait until operation is complete
             byte ESRvalue = 0;
-            while((ESRvalue & 1) == 0)
+            while ((ESRvalue & 1) == 0)
             {
                 ESRvalue = byte.Parse(WriteRawQuery("*ESR?"));
                 Thread.Sleep(500);
             }
-            mbSession.TimeoutMilliseconds = 2000;  // set timeout back to 2 seconds
-        } 
+            SetIOTimeout(2000);  // set timeout back to 2 seconds
+        }
 
         public override void SetOutputOff(int channel)
         {
@@ -108,7 +108,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
             SDGResponse r = new SDGResponse(response);
             return r.Frequency;
             //C1:BSWV WVTP,SINE,FRQ,60HZ,PERI,0.0166667S,AMP,4V,AMPVRMS,1.414Vrms,OFST,0V,HLEV,2V,LLEV,-2V,PHSE,0
-           
+
         }
 
         public override void SetAmplitude(double amplitude, int channel)
@@ -138,18 +138,18 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
             SDGResponse r = new SDGResponse(response);
             return r.DCOffset;
         }
-        
+
         public override void UploadWaveformData(double[] voltageArray, double sampleRate, double DCOffset, double phase, string memoryLocation)
         {
-            if(voltageArray.Max() > 10)
+            if (voltageArray.Max() > 10)
             {
                 throw new ArgumentException("Requested maximum voltage is too high for this function generator");
             }
-            if(voltageArray.Min() < -10)
+            if (voltageArray.Min() < -10)
             {
                 throw new ArgumentException("Requested minimum voltage is too low for this function generator");
             }
-            if(voltageArray.Length > 8000000)  // check if the input data has too many points
+            if (voltageArray.Length > 8000000)  // check if the input data has too many points
             {
                 throw new ArgumentException("Too many points for this function generator");
             }
@@ -170,26 +170,26 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
                 throw new ArgumentException("Voltages are out of range of the SDG2042X, maximum supported amplitude is 20Vpp");
             }
             List<short> waveData = new List<short>();  // get a list<short>
-            
+
             foreach (double d in voltageArray)  // map the voltages to 16 bit short values
-           
+
             {
                 double scaledVoltage = (d - minVoltage) / voltageDiff;  // scaled to a fraction of 1
-                short temp = (short) (-32768 + (scaledVoltage * 65535));  // then mapped onto the 16 bit range of short values
+                short temp = (short)(-32768 + (scaledVoltage * 65535));  // then mapped onto the 16 bit range of short values
                 waveData.Add(temp);
             }
-            
+
             short[] toReturn = waveData.ToArray();
             UploadWaveformData(toReturn, sampleRate, minVoltage, maxVoltage, DCOffset, phase, memoryLocation);
         }
-        
+
         public override void UploadWaveformData(short[] waveData, double sampleRate, double lowLevel, double highLevel, double DCOffset, double phase, string memoryLocation)
         {
             if (waveData.Length > 8000000)  // check if the input data has too many points
             {
                 throw new ArgumentException("Too many points for this function generator");
             }
-            if(waveData.Length < 8)
+            if (waveData.Length < 8)
             {
                 throw new ArgumentException("Too few points for this function generator");
             }
@@ -202,22 +202,22 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
                 throw new ArgumentException("highLevel must be greater than lowLevel");
             }
             if (!BitConverter.IsLittleEndian)  // The function generator expects any sent data to be little-endian encoded
-                // so if the data is in big endian we have to swap the ordering.
+                                               // so if the data is in big endian we have to swap the ordering.
             {
                 List<short> swap = new List<short>();
                 byte[] byteSwap = new byte[2];
-                foreach(short sh in waveData)  // iterate over all the shorts in waveform data
+                foreach (short sh in waveData)  // iterate over all the shorts in waveform data
                 {
                     byteSwap = BitConverter.GetBytes(sh);
                     Array.Reverse(byteSwap);  // and swap their bytes
-                    swap.Add(BitConverter.ToInt16(byteSwap,0));  // before putting them back in the array
+                    swap.Add(BitConverter.ToInt16(byteSwap, 0));  // before putting them back in the array
                 }
                 waveData = swap.ToArray();  // and using that array instead.
             }
-           
+
             double amplitude = highLevel - lowLevel;
-           // Console.WriteLine("Amplitude is " + amplitude);
-           // Console.WriteLine("DC offset is " + DCOffset);
+            // Console.WriteLine("Amplitude is " + amplitude);
+            // Console.WriteLine("DC offset is " + DCOffset);
             int numSamples = waveData.Length;  // get the number of samples
             byte[] byteFormWaveData = new byte[waveData.Length * sizeof(short)];  // create a new array of bytes
             Buffer.BlockCopy(waveData, 0, byteFormWaveData, 0, byteFormWaveData.Length);  // and copy the shorts into it 
@@ -226,31 +226,31 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
             // to the ones stored in the new waveform, even if that's really not what was asked for.
             string currentWaveData = WriteRawQuery("C1:BSWV?");
             double currentSampleRate = 400;  // probably shouldn't even take the chance of having it be 0.
-            if(GetWaveformType(1) == WaveformType.ARB)
+            if (GetWaveformType(1) == WaveformType.ARB)
             {
                 currentSampleRate = GetSampleRate(1);
-            } 
-           string commandToWrite = "C1:WVDT WVNM," + memoryLocation + ",FREQ," +
-           (sampleRate / numSamples) + ",AMPL," + amplitude + ",OFST," + DCOffset + ",PHASE," + phase + ",WAVEDATA,";
-           // string commandToWrite = "C1:WVDT WVNM," + memoryLocation + ",FREQ," +
-             // (sampleRate / numSamples) + ",LLEV," + lowLevel + ",HLEV," + highLevel+ ",PHASE," + phase + ",WAVEDATA,";
+            }
+            string commandToWrite = "C1:WVDT WVNM," + memoryLocation + ",FREQ," +
+            (sampleRate / numSamples) + ",AMPL," + amplitude + ",OFST," + DCOffset + ",PHASE," + phase + ",WAVEDATA,";
+            // string commandToWrite = "C1:WVDT WVNM," + memoryLocation + ",FREQ," +
+            // (sampleRate / numSamples) + ",LLEV," + lowLevel + ",HLEV," + highLevel+ ",PHASE," + phase + ",WAVEDATA,";
             // string part of the command to write.
             List<byte> byteList = new List<byte>();  // create a List of bytes
             byteList.AddRange(Encoding.ASCII.GetBytes(commandToWrite));  // add the ASCII encoded string to the list of bytes
             byteList.AddRange(byteFormWaveData);  // then add the waveform data
-            mbSession.TimeoutMilliseconds = 30000;
+            SetIOTimeout(30000);
             WriteRawData(byteList.ToArray());
             WriteRawCommand(currentWaveData);
-            if(GetWaveformType(1) == WaveformType.ARB)  // if there's any issue with the interface with unknown timeout errors and the like
-                // it's gonna be from this code right here. Also any weird issues with parameters changing on upload.
-                // that's all going to be from here.
+            if (GetWaveformType(1) == WaveformType.ARB)  // if there's any issue with the interface with unknown timeout errors and the like
+                                                         // it's gonna be from this code right here. Also any weird issues with parameters changing on upload.
+                                                         // that's all going to be from here.
             {
-                SetSampleRate(currentSampleRate,1);
+                SetSampleRate(currentSampleRate, 1);
             }
-            mbSession.TimeoutMilliseconds = 2000;
+            SetIOTimeout(2000);
         }
 
- 
+
         public override void SetSampleRate(double sampleRate, int channel)
         {
             CheckChannelParam(channel);
@@ -258,7 +258,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
         }
 
         public override double GetSampleRate(int channel)  // luckily this command is different, so it doesn't need to work with the
-            // response parser class
+                                                           // response parser class
         {
             CheckChannelParam(channel);
             string response = WriteRawQuery("C" + channel + ":SRATE?");
@@ -269,7 +269,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
             }
             if (keys[1] == "DDS")  // if the generator is not in direct sampling (TruArb) mode return -1
             {
-                return -1;  
+                return -1;
             }
             {
 
@@ -327,7 +327,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
         {
             // all waveform types in the enum are specified for this function generator
             CheckChannelParam(channel);
-            int waveNum= (int) waveType;
+            int waveNum = (int)waveType;
             string waveName = Enum.GetName(typeof(WaveformType), waveNum);
             WriteRawCommand("C" + channel + ":BSWV WVTP," + waveName);
         }
@@ -346,7 +346,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
             StringBuilder sb = new StringBuilder(commandToWrite);
             foreach (byte b in data)
             {
-                sb.Append((char)b); 
+                sb.Append((char)b);
             }
             WriteRawCommand(sb.ToString());
         }
@@ -389,7 +389,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
         {
             //C1:BSWV WVTP,SINE,FRQ,22.22222222HZ,PERI,0.045S,AMP,4V,AMPVRMS,1.414Vrms,OFST,0V,HLEV,2V,LLEV,-2V,PHSE,0
             // things that are likely to exist are set to 0 originally, the ones that will likely never be relevant are set to -1 
-            public int Channel { get;}
+            public int Channel { get; }
             public WaveformType Wavetype { get; }
             public double Frequency { get; }
             public double Period { get; }
@@ -422,13 +422,13 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
                 Bandwidth = -1;
                 Channel = int.Parse(queryResponse.Substring(1, 1));  // set the channel.
                 List<string> tokens = new List<string>();
-                string responseString = queryResponse.Substring(8, queryResponse.Length-8);  // trim channel number and BSWV command
+                string responseString = queryResponse.Substring(8, queryResponse.Length - 8);  // trim channel number and BSWV command
                 MatchCollection matches = Regex.Matches(responseString, "[^,]+,[^,]+,*");
-                foreach(Match item in matches)
+                foreach (Match item in matches)
                 {
-                    tokens.Add(item.Value.Substring(0,item.Value.Length-1));
+                    tokens.Add(item.Value.Substring(0, item.Value.Length - 1));
                 }
-                foreach(string s in tokens)
+                foreach (string s in tokens)
                 {
                     string[] keyvalue = s.Split(',');
                     string key = keyvalue[0];
@@ -463,26 +463,26 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
                             Phase = double.Parse(value.Substring(0, value.Length));
                             break;
                         case "STDEV":
-                            Stdev = double.Parse(value.Substring(0, value.Length-1));
+                            Stdev = double.Parse(value.Substring(0, value.Length - 1));
                             break;
                         case "MEAN":
-                            Mean = double.Parse(value.Substring(0, value.Length-1));
+                            Mean = double.Parse(value.Substring(0, value.Length - 1));
                             break;
                         case "WIDTH":
                             Width = double.Parse(value.Substring(0, value.Length));
                             break;
                         case "RISE":
-                            Rise = double.Parse(value.Substring(0, value.Length-1), NumberStyles.Float);  // remove the S
+                            Rise = double.Parse(value.Substring(0, value.Length - 1), NumberStyles.Float);  // remove the S
                             // NumberStyles.Float is required for parsing the string in exponent formed that is returned
                             break;
                         case "FALL":
-                            Fall = double.Parse(value.Substring(0, value.Length-1), NumberStyles.Float);  // remove the S
+                            Fall = double.Parse(value.Substring(0, value.Length - 1), NumberStyles.Float);  // remove the S
                             break;
                         case "DLY":
                             Delay = double.Parse(value.Substring(0, value.Length));
                             break;
                         case "HLEV":
-                            HighLevel = double.Parse(value.Substring(0, value.Length-1));  // remove the V
+                            HighLevel = double.Parse(value.Substring(0, value.Length - 1));  // remove the V
                             break;
                         case "LLEV":
                             LowLevel = double.Parse(value.Substring(0, value.Length - 1));  // remove the V

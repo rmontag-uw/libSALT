@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace TestingPlatformLibrary.FunctionGeneratorAPI
 {
-    
+
     /// <summary>
     ///  This class provides a skeletal implementation of 
     ///  the IFunctionGenerator interface to minimize the effort required to implement the interface.
@@ -18,7 +16,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
     {
         protected int numChannels;  // the number of channels that this function generator has
         protected VISAFunctionGenerator(string visaID, int numChannels)
-            :base(visaID)
+            : base(visaID)
         {
             this.numChannels = numChannels;  // set the number of output channels that this function generator has
         }
@@ -44,7 +42,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
         /// </summary>
         public void SetAllOutputsOff()
         {
-            for(int i = 1; i <= numChannels; i++)  // not zero-based indexing.
+            for (int i = 1; i <= numChannels; i++)  // not zero-based indexing.
             {
                 SetOutputOff(i);  // just go through each of the channels the function generator has and switch them off.
             }
@@ -61,8 +59,8 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
          */
         protected void CheckChannelParam(int channel)
         {
-            if(channel > GetNumChannels() || channel < 1)  // throw an exception if the channel being asked for is
-                // higher than what the function generator has, or if it's less than 1.
+            if (channel > GetNumChannels() || channel < 1)  // throw an exception if the channel being asked for is
+                                                            // higher than what the function generator has, or if it's less than 1.
             {
                 throw new ArgumentOutOfRangeException(
                     "The requested output channel does not exist on this function generator. " +

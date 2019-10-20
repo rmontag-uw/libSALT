@@ -27,9 +27,9 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
             0.000000200, 0.000000500, 0.000001000, 0.000002000, 0.000005000, 0.000010000, 0.000020000, 0.00005, 0.00010, 0.00020,
             0.00050, 0.00100, 0.00200, 0.00500, .01, .02, .05, .1, .2, .5, 1, 2, 5, 10, 20, 50};
         // Need to find a DS1054z that has not had the upgrades installed in order to see what the actual different memory depth ranges are.
-        private readonly int[] channelOneOnlyAllowedMemDepth = new[] { 12000, 120000, 1200000, 12000000};
-        private readonly int[] dualChannelAllowedMemDepth = new[] { 6000, 60000, 600000, 6000000};
-        private readonly int[] threeAndFourChannelAllowedMemDepth = new[] { 3000, 30000, 300000, 3000000};
+        private readonly int[] channelOneOnlyAllowedMemDepth = new[] { 12000, 120000, 1200000, 12000000 };
+        private readonly int[] dualChannelAllowedMemDepth = new[] { 6000, 60000, 600000, 6000000 };
+        private readonly int[] threeAndFourChannelAllowedMemDepth = new[] { 3000, 30000, 300000, 3000000 };
         private readonly HashSet<int> enabledChannels;
         public DS1054Z(string visaID)
 
@@ -79,9 +79,9 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
             WriteRawCommand(":wav:sour chan" + channel);  // set the channel to grab the wavedata from to the one specified
             WriteRawCommand(":wav:mode norm");  // set the waveform capture mode to normal
             WriteRawCommand(":wav:form byte");  // set the waveform format to byte (fastest and can capture the most data at once)
-            WriteRawCommand("wav:start 1");
-            WriteRawCommand("wav:stop 1200");  // gotta set this so we can still get data after we log to the file
-            byte[] rawData = ReadRawData(":wav:data?"); // grab the wave data from the scope by reading it as a byte array
+                                                // WriteRawCommand("wav:start 1");  //  actually it's better if we DONT set these flags
+                                                // WriteRawCommand("wav:stop 1200");  // gotta set this so we can still get data after we log to the file
+            byte[] rawData = ReadRawData(":wav:data?", 3000); // grab the wave data from the scope by reading it as a byte array
 
             /*  Data processing. The waveform data read contains the TMC header. The length of the header is 11
                 bytes, wherein, the first 2 bytes are the TMC header denoter (#) and the width descriptor (9)
@@ -102,7 +102,7 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
             double Yinc = GetYIncrement();
             double Yref = GetYReference();
             List<double> toReturn = new List<double>();
-            foreach(byte b in rawData)
+            foreach (byte b in rawData)
             {
                 toReturn.Add(ScaleVoltage(b, YOrigin, Yinc, Yref));
             }
@@ -151,7 +151,7 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
                     stopPosition += pruned.Length;
                 }
             }
-           // Console.WriteLine(buffer.Count);
+            // Console.WriteLine(buffer.Count);
             return buffer.ToArray();
         }
 
@@ -190,16 +190,6 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         public override void Stop()
         {
             WriteRawCommand(":stop");
-        }
-
-        protected override byte[] ReadRawData(string query)
-        {
-            lock (threadLock)
-            {
-                mbSession.FormattedIO.WriteLine(query);
-                return mbSession.RawIO.Read(3000);
-            }
-
         }
 
         public override double GetYIncrement(int channel)
@@ -395,26 +385,28 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
 
         public override int[] GetAllowedMemDepths()
         {
-            if(enabledChannels.Count() == 1)
+            if (enabledChannels.Count() == 1)
             {
                 if (enabledChannels.Contains(1))  // it's a weird quirk that we can only use the large memdepths when only channel 1 is enabled
                 {
                     return channelOneOnlyAllowedMemDepth;
                 }
                 return dualChannelAllowedMemDepth;  // we have to use the "dual channel" memory depth setting if any of the others are enabled, even if it's just channel 2 for
-                    // example.
+                                                    // example.
             }
-            if(enabledChannels.Count() == 2)  // this is so odd. If channel 1 is enabled, then the memory depth is twice as much as it would be otherwise for that number if channel
-                // 1 was not enabled
+            if (enabledChannels.Count() == 2)  // this is so odd. If channel 1 is enabled, then the memory depth is twice as much as it would be otherwise for that number if channel
+                                               // 1 was not enabled
             {
                 if (enabledChannels.Contains(1))
                 {
                     return dualChannelAllowedMemDepth;
-                } else
+                }
+                else
                 {
                     return threeAndFourChannelAllowedMemDepth;
                 }
-            } else
+            }
+            else
             {
                 return threeAndFourChannelAllowedMemDepth;
             }

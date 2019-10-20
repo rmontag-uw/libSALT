@@ -12,10 +12,11 @@ namespace TestingPlatformLibrary
     public abstract class VISADevice : ITestAndMeasurement
     {
         protected readonly string visaID;  // visaID of this oscilloscope.
-        protected IMessageBasedSession mbSession;  // the message session between the computer and the oscilloscope hardware
+        private readonly IMessageBasedSession mbSession;  // the message session between the computer and the oscilloscope hardware
+                                                          // this used to be protected, if there are any extremely device specific reasons that require access to the message session, I might change it back
         private readonly object threadLock;  // each device can have its own I/O thread.
         private WaitHandle waitHandleIO;  // callback stuff
-        protected readonly ManualResetEvent manualResetEventIO;
+        private readonly ManualResetEvent manualResetEventIO;
         protected VISADevice(string visaID)
         {
             this.visaID = visaID;  // set this visaID to the parameter visaID
@@ -24,7 +25,7 @@ namespace TestingPlatformLibrary
             mbSession = GlobalResourceManager.Open(this.visaID) as IMessageBasedSession;  // open the message session between the computer and the device.
         }
 
-        public void WriteRawCommand(string command)
+        protected void WriteRawCommand(string command)
         {
             lock (threadLock)
             {
@@ -32,7 +33,7 @@ namespace TestingPlatformLibrary
             }
         }
 
-        public string WriteRawQuery(string query)
+        protected string WriteRawQuery(string query)
         {
             lock (threadLock)
             {
@@ -77,10 +78,12 @@ namespace TestingPlatformLibrary
         }
 
         /// <summary>
-        /// I know that simply increasing the timeout before doing an operation and then setting it back down once complete might be bad style, but it's what is required for some things.
+        /// I know that simply increasing the timeout before doing an operation and then setting it back down once complete might be bad style, 
+        /// but it's what is required for some things.
         /// </summary>
-        /// <param name="time">The time to set the I/O timeout value to</param>
-        protected void SetIOTimeout(int time)
+        /// <remarks>This only sets the timeout value for the device that this function is called from (from its implementation)</remarks>
+        /// <param name="time">The value to set I/O timeout to, in milliseconds</param>
+        protected void SetIOTimeout(int time)  // should this be a public method?
         {
             mbSession.TimeoutMilliseconds = time;
         }
