@@ -9,7 +9,9 @@ namespace TestingPlatformLibrary
         VISA_SERIAL = 2,
         VXI_LAN = 3,
         RAW_SOCKET = 4,
-        OTHER_RESERVED = 5
+        RAW_USBTMC = 5,
+        RAW_SERIAL = 6,
+        OTHER_RESERVED = 7,  // FOR INTERNAL USE ONLY 
     }
 
     public enum DeviceType
@@ -18,7 +20,6 @@ namespace TestingPlatformLibrary
         Oscilloscope = 1,
         Multimeter = 2,
         DC_Power_Supply = 3,
-        OTHER_RESERVED = 4
     }
 
     public interface ITestAndMeasurement
@@ -29,7 +30,7 @@ namespace TestingPlatformLibrary
         /// even if the device is not connected over a VISA interface. The device must be on and connected for this function to work.
         /// </summary>
         /// <returns>An identification string unique to the device, in the format "<Manufacturer>, <Model>, <Serial_Number>"</returns>
-        /// <exception cref="Exception">thrown if the device is not on or not connected</exception>
+        /// <exception cref="InvalidOperationException">thrown if the device is not on or not connected</exception>
         string GetIdentificationString();
 
         /// <summary>
@@ -41,21 +42,22 @@ namespace TestingPlatformLibrary
         /// <see cref="GetIdentificationString"/> The response string should likely be hard-coded as a constant in the implementation class
         /// </remarks>
         /// <returns>A string which is unique to the manufacturer and model of the instrument</returns>
-        /// <exception cref="Exception">thrown if the device is not on or not connected</exception>
         string GetModelString();
 
         /// <summary>
         /// Returns the way the current device is connected to the computer as a ConnectionType enum.
         /// </summary>
+        /// <remarks>Currently this is more of a future proofing technique than anything remarkable. Results are currently undefined
+        /// if the device is not on or not connected. (Alas since this field is hardcoded in all the current device implementations, it will
+        /// likely not break anything)
+        /// </remarks>
         /// <returns>the way the current device is connected to the computer as a ConnectionType enum</returns>
-        /// <exception cref="Exception">thrown if the device is not on or not connected</exception>
         ConnectionType GetConnectionType();
 
         /// <summary>
         /// Returns the device type of the device as a DeviceType enum.
         /// </summary>
         /// <returns>the device type of the device as a DeviceType enum</returns>
-        /// <exception cref="Exception">thrown if the device is not on or not connected</exception>
         DeviceType GetDeviceType();
 
     }

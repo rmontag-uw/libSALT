@@ -1,5 +1,4 @@
 ﻿using Ivi.Visa;
-using NationalInstruments.Visa;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,20 +19,21 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
     public abstract class VISAFunctionGenerator : IFunctionGenerator
     {
         protected readonly string visaID;  // visaID of this function generator.
-        protected readonly IResourceManager rm;  // the resource manager (only one instance per runtime)
         protected IMessageBasedSession mbSession;  // the message session between the computer and the function gen hardware
         protected int numChannels;  // the number of channels that this function generator has
         protected WaitHandle waitHandleIO;  // callback stuff
         protected readonly ManualResetEvent manualResetEventIO;
         private static readonly object threadLock = new object();  // for thread locking
-        protected VISAFunctionGenerator(string visaID, IResourceManager rm, int numChannels)
+        protected VISAFunctionGenerator(string visaID, int numChannels)
         {
             this.visaID = visaID;  // set this visaID to the parameter visaID
-            this.rm = rm;  // set the resource manager to the parameter rm.
             manualResetEventIO = new ManualResetEvent(false);  // init the manualResetEvent
             this.numChannels = numChannels;  // set the number of output channels that this function generator has
-            mbSession = (IMessageBasedSession)rm.Open(this.visaID);  // open the message session 
+            mbSession = GlobalResourceManager.Open(this.visaID) as IMessageBasedSession;  // open the message session 
             // between the computer and the function generator.
+            // If the user does not have a valid IVI-VISA compliant implementation on their computer, mbSession ends up being null. We should
+            // check for that, and deal with it accordingly, so we don't end up with random NullReferenceExceptions somewhere down the line.
+
         }
 
         /*
@@ -385,7 +385,15 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
 
         public string GetIdentificationString()
         {
-            string response = WriteRawQuery("*IDN?");
+            string response;
+            try
+            {
+                response = WriteRawQuery("*IDN?");
+            }
+            catch (IOTimeoutException e)  // if there's a VISA timeout
+            {
+                throw new InvalidOperationException("VISA Device Timeout", e);
+            }
             string[] tokens = response.Split(',');
             string toReturn = tokens[0] + tokens[1] + tokens[2];
             return toReturn;
@@ -411,7 +419,6 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
         public static ConnectedFunctionGeneratorStruct GetConnectedFunctionGenerators()
         {
             IEnumerable<string> resources;
-            IResourceManager rm = new ResourceManager();
             IMessageBasedSession searcherMBS;
             List<string> connectedDeviceModels = new List<string>();  // get a list of connected VISA device model names
             List<string> rawVISAIDs = new List<string>();  // get a list of connect VISA devices' returned IDs
@@ -419,12 +426,12 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
             bool unknownFunctionGeneratorFound = false;
             try
             {
-                resources = rm.Find("?*");  // find all connected VISA devices
+                resources = GlobalResourceManager.Find("?*");  // find all connected VISA devices
                 foreach (string s in resources)  // after this loop, connectedDeviceModels contains a list of connected devices in the form <Model>
                 {
                     rawVISAIDs.Add(s);  // we need to add 
                     string IDNResponse;
-                    searcherMBS = (IMessageBasedSession)rm.Open(s);  // open the message session 
+                    searcherMBS = GlobalResourceManager.Open(s) as IMessageBasedSession;  // open the message session 
 
                     lock (threadLock)  // since we're doing stuff with I/O we need to use the lock
                     {
@@ -439,7 +446,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
                 }
                 for (int i = 0; i < connectedDeviceModels.Count; i++)  // connectedDeviceModels.Count() == rawVISAIDs.Count()
                 {
-                    VISAFunctionGenerator temp = GetDeviceFromModelString(connectedDeviceModels[i], rawVISAIDs[i], rm);
+                    VISAFunctionGenerator temp = GetDeviceFromModelString(connectedDeviceModels[i], rawVISAIDs[i]);
                     if (temp == null)
                     {
                         unknownFunctionGeneratorFound = true;  // if there's one 
@@ -451,19 +458,16 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
                 }
                 return new ConnectedFunctionGeneratorStruct(toReturn.ToArray(), unknownFunctionGeneratorFound);
             }
-            catch (Ivi.Visa.NativeVisaException)  // if no devices are found, return a struct with an array of size 0
+            catch (VisaException)  // if no devices are found, return a struct with an array of size 0
             {
                 return new ConnectedFunctionGeneratorStruct(new VISAFunctionGenerator[0], false);
             }
         }
 
-        // This should be replaced with some reflection based solution in the future, so that users would just need to drop in their scope implementation
-        // and recompile without having to touch anything here.
-        // if the modelString parameter is not found in the hardcoded list of valid function generators, this function returns null.
-        // All the scopes returned by this function are initialized and ready to be written to/read from
-        private static VISAFunctionGenerator GetDeviceFromModelString(string modelString, string VISAID, IResourceManager rm)
+        // This now uses a reflection based solution as originally planned.
+        private static VISAFunctionGenerator GetDeviceFromModelString(string modelString, string VISAID)
         {
-            object[] parameterObject = { VISAID, rm };  // the parameters for all of the VISAFunctionGenerator subclass constructors
+            object[] parameterObjects = {VISAID};  // the parameters for all of the VISAFunctionGenerator subclass constructors
             // reflection time
             string currentNameSpace = typeof(VISAFunctionGenerator).Namespace; // get the namespace of this class, all subclasses must be
                                                                           // in the same namespace in order to be found and instantiated via reflection.
@@ -475,7 +479,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
             {
                 if (modelString.Equals(t.Name))  // if the name of that subclass matches the model of the function generator found, bingo!
                 {
-                    return (VISAFunctionGenerator)Activator.CreateInstance(t, parameterObject);  // create an instance of the object with the proper
+                    return (VISAFunctionGenerator)Activator.CreateInstance(t, parameterObjects);  // create an instance of the object with the proper
                                                                                             // constructor and return it
                 }
             }

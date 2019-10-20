@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using Ivi.Visa;
 
 namespace TestingPlatformLibrary.OscilloscopeAPI
 {
@@ -32,9 +31,9 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         private readonly int[] dualChannelAllowedMemDepth = new[] { 6000, 60000, 600000, 6000000};
         private readonly int[] threeAndFourChannelAllowedMemDepth = new[] { 3000, 30000, 300000, 3000000};
         private readonly HashSet<int> enabledChannels;
-        public DS1054Z(string visaID, IResourceManager rm)
+        public DS1054Z(string visaID)
 
-             : base(visaID, rm, numberOfChannels)
+             : base(visaID, numberOfChannels)
         {
             enabledChannels = new HashSet<int>();
         }  // might need to put some commands to run here on startup, we'll see
