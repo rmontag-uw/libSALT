@@ -225,7 +225,7 @@ namespace TestingPlatformLibrary
 
         /// <summary>
         /// Per SCPI (and now VISA) standards, all VISA devices must adhere to the 10-ish IEEE 488.2 standard commands.
-        /// The one in question here is *RST
+        /// The command in question here is *RST
         /// <remarks>Use this one with caution, as the instrument could possible end up in an unknown(to the program) state</remarks>
         /// </summary>
         public void Reset()
