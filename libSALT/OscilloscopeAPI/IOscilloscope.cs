@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TestingPlatformLibrary.OscilloscopeAPI
+namespace libSALT.OscilloscopeAPI
 {
     public interface IOscilloscope : ITestAndMeasurement
     {

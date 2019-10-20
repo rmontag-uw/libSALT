@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading;
 using Ivi.Visa;
 
-namespace TestingPlatformLibrary
+namespace libSALT
 {
     /// <summary>
     /// This class provides abstracted low level VISA I/O functions.

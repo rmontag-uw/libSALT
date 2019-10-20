@@ -4,7 +4,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Linq;
 
-namespace TestingPlatformLibrary.FunctionGeneratorAPI
+namespace libSALT.FunctionGeneratorAPI
 {
     /* The intended purpose of this class is for debugging application code.
      * 
