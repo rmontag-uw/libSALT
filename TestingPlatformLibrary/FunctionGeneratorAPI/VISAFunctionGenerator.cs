@@ -48,7 +48,7 @@ namespace TestingPlatformLibrary.FunctionGeneratorAPI
             }
         }
 
-        public ConnectedDeviceStruct<VISAFunctionGenerator> GetConnectedFunctionGenerators()
+        public static ConnectedDeviceStruct<VISAFunctionGenerator> GetConnectedFunctionGenerators()
         {
             return GetConnectedDevices<VISAFunctionGenerator>();
         }

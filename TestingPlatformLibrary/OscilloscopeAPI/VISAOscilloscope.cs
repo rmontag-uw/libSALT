@@ -24,7 +24,7 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
             return DeviceType.Oscilloscope;
         }
 
-        public ConnectedDeviceStruct<VISAOscilloscope> GetConnectedOscilloscopes()
+        public static ConnectedDeviceStruct<VISAOscilloscope> GetConnectedOscilloscopes()
         {
             return GetConnectedDevices<VISAOscilloscope>();
         }
