@@ -224,13 +224,40 @@ namespace TestingPlatformLibrary
         }
 
         /// <summary>
+        /// Writes the specified command to the device, using the service request event to wait until completion
+        /// </summary>
+        /// <param name="command">The command to write</param>
+        /// <param name="timeout">The timeout of the command, in ms</param>
+        /// <exception cref="NativeVisaException">Thrown if the request times out</exception>
+        private void WriteRawCommandWithServiceRequest(string command, int timeout)
+        {
+            lock (threadLock)  // need to use the actual mbSession functions instead of the VISADevice ones because this command needs its own lock
+            {
+                mbSession.FormattedIO.WriteLine("*ESR?");   // clear out the event status register
+                mbSession.FormattedIO.ReadLine();
+                mbSession.DiscardEvents(EventType.ServiceRequest);  // clear event buffer just in case
+                mbSession.EnableEvent(EventType.ServiceRequest);
+                mbSession.FormattedIO.WriteLine(command + ";*OPC");
+                mbSession.WaitOnEvent(EventType.ServiceRequest, timeout);
+                mbSession.FormattedIO.WriteLine("*ESR?");   // clear out the event status register again just in case
+                mbSession.FormattedIO.ReadLine();
+            }
+        }
+
+        /// <summary>
         /// Per SCPI (and now VISA) standards, all VISA devices must adhere to the 10-ish IEEE 488.2 standard commands.
         /// The command in question here is *RST
         /// <remarks>Use this one with caution, as the instrument could possible end up in an unknown(to the program) state</remarks>
         /// </summary>
         public void Reset()
         {
-            WriteRawCommand("*RST");
+            lock (threadLock)
+            {
+                mbSession.FormattedIO.WriteLine("RST*");
+                Thread.Sleep(5000);  // there is actually no other way to do this. All event/status byte registers are cleared when doing a reset command
+                                      // which means that trying to do this with a callback will always result in a timeout error. 5 seconds seems like 
+                                      //enough to me.
+            }
         }
     }
 }

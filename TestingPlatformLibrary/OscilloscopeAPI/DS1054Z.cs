@@ -16,6 +16,8 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         private const double voltageOffsetScaleConstant = 8;
         private const double triggerOffsetScaleConstant = 5;
         private const double timeOffsetScaleConstant = 10;
+        private const int numVerticalDivisions = 8;
+        private const int numHorizontalDivisions = 12;
         private const string ModelString = "RIGOL TECHNOLOGIES,DS1054Z";
         private readonly double[] voltageScalePresets = new[] { .01, .02, .05, .1, .2, .5, 1, 2, 5, 10, 20, 50, 100 };
         private readonly string[] voltageScalePresetStrings = new[] {"10mV","20mV", "50mV", "100mV", "200mV",
@@ -81,7 +83,7 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
             WriteRawCommand(":wav:form byte");  // set the waveform format to byte (fastest and can capture the most data at once)
                                                 // WriteRawCommand("wav:start 1");  //  actually it's better if we DONT set these flags
                                                 // WriteRawCommand("wav:stop 1200");  // gotta set this so we can still get data after we log to the file
-            byte[] rawData = ReadRawData(":wav:data?", 3000); // grab the wave data from the scope by reading it as a byte array
+            byte[] rawData = ReadRawData(":wav:data?", 2000); // grab the wave data from the scope by reading it as a byte array
 
             /*  Data processing. The waveform data read contains the TMC header. The length of the header is 11
                 bytes, wherein, the first 2 bytes are the TMC header denoter (#) and the width descriptor (9)
@@ -452,6 +454,16 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         public override double GetXAxisOffsetScaleConstant()
         {
             return timeOffsetScaleConstant;
+        }
+
+        public override int GetNumVerticalDivisions()
+        {
+            return numVerticalDivisions;
+        }
+
+        public override int GetNumHorizontalDivisions()
+        {
+            return numHorizontalDivisions;
         }
     }
 }

@@ -83,5 +83,7 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         public abstract byte[] GetDeepMemData(int channel);
         public abstract double[] GetDeepMemVoltages(int channel);
         public abstract Color GetChannelColor(int channel);
+        public abstract int GetNumVerticalDivisions();
+        public abstract int GetNumHorizontalDivisions();
     }
 }

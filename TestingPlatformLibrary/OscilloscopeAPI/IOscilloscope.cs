@@ -362,6 +362,20 @@ namespace TestingPlatformLibrary.OscilloscopeAPI
         /// <param name="channel">The channel to request the color of</param>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if the requested channel doesn't exist</exception>
         /// <returns>The waveform trace color of the requested channel</returns>
-        System.Drawing.Color GetChannelColor(int channel); 
+        System.Drawing.Color GetChannelColor(int channel);
+
+        /// <summary>
+        /// Returns the number of vertical divisions (number of boxes from top to bottom of screen) represented on the oscillscope screen.
+        /// The crosshair is assumed to be at division halfway down the screen, and halfway across the screen as well
+        /// </summary>
+        /// <returns>The number of vertical divisions of the oscilloscope</returns>
+        int GetNumVerticalDivisions();
+
+        /// <summary>
+        /// Returns the number of horizontal divisions (number of boxes from left to right of screen) represented on the oscillscope screen.
+        /// The crosshair is assumed to be at division halfway across the screen, and halfway down the screen as well
+        /// </summary>
+        /// <returns>The number of horizontal divisions of the oscilloscope</returns>
+        int GetNumHorizontalDivisions();
     }
 }
