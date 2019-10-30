@@ -82,10 +82,13 @@ namespace libSALT.OscilloscopeAPI
             WriteRawCommand(":wav:sour chan" + channel);  // set the channel to grab the wavedata from to the one specified
             WriteRawCommand(":wav:mode norm");  // set the waveform capture mode to normal
             WriteRawCommand(":wav:form byte");  // set the waveform format to byte (fastest and can capture the most data at once)
-                                                // WriteRawCommand("wav:start 1");  //  actually it's better if we DONT set these flags
-                                                // WriteRawCommand("wav:stop 1200");  // gotta set this so we can still get data after we log to the file
-            byte[] rawData = ReadRawData(":wav:data?", 2000); // grab the wave data from the scope by reading it as a byte array
 
+            SetIOTimeout(100000);  // the thing about this is that for this scope in particular, the reading of data can just take a long time when at high time/div
+            // values. It seems that the trigger status is not a perfect way to gather this information, and this is not a perfect workaround, but for now, it's what
+            // we have.
+
+            byte[] rawData = ReadRawData(":wav:data?", 2000); // grab the wave data from the scope by reading it as a byte array
+            SetIOTimeout(2000);
             /*  Data processing. The waveform data read contains the TMC header. The length of the header is 11
                 bytes, wherein, the first 2 bytes are the TMC header denoter (#) and the width descriptor (9)
                 respectively, the 9 bytes following are the length of the data which is followed by the waveform data
@@ -470,6 +473,26 @@ namespace libSALT.OscilloscopeAPI
         public override int GetNumPointsPerScreenCapture()
         {
             return numPointsPerScreen;
+        }
+
+        public override TriggerStatus GetTriggerStatus()
+        {
+            string triggerStatus = WriteRawQuery(":TRIGger:STATus?");
+            switch (triggerStatus)
+            {
+                case "TG":
+                    return TriggerStatus.Triggered;
+                case "WAIT":
+                    return TriggerStatus.Waiting;
+                case "RUN":
+                    return TriggerStatus.Running;
+                case "AUTO":
+                    return TriggerStatus.Auto;
+                case "STOP":
+                    return TriggerStatus.Stopped;
+                default:
+                    return TriggerStatus.Unknown_Status;
+            }
         }
     }
 }

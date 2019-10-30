@@ -86,5 +86,6 @@ namespace libSALT.OscilloscopeAPI
         public abstract int GetNumVerticalDivisions();
         public abstract int GetNumHorizontalDivisions();
         public abstract int GetNumPointsPerScreenCapture();
+        public abstract TriggerStatus GetTriggerStatus();
     }
 }

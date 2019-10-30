@@ -37,8 +37,15 @@ namespace libSALT
         {
             lock (threadLock)
             {
-                mbSession.FormattedIO.WriteLine(query);
-                return mbSession.FormattedIO.ReadLine();
+                try  // are these try/catch blocks too slow???
+                {
+                    mbSession.FormattedIO.WriteLine(query);
+                    return mbSession.FormattedIO.ReadLine();
+                }
+                catch (IOTimeoutException e)
+                {
+                    throw new TimeoutException("Timeout in WriteRawQuery", e);
+                }
             }
         }
 
@@ -46,8 +53,15 @@ namespace libSALT
         {
             lock (threadLock)
             {
-                mbSession.FormattedIO.WriteLine(query);
-                return mbSession.RawIO.Read();
+                try
+                {
+                    mbSession.FormattedIO.WriteLine(query);
+                    return mbSession.RawIO.Read();
+                }
+                catch (IOTimeoutException e)
+                {
+                    throw new TimeoutException("Timeout in ReadRawData", e);
+                }
             }
         }
 
@@ -55,8 +69,15 @@ namespace libSALT
         {
             lock (threadLock)
             {
-                mbSession.FormattedIO.WriteLine(query);
-                return mbSession.RawIO.Read(bytesToRead);
+                try
+                {
+                    mbSession.FormattedIO.WriteLine(query);
+                    return mbSession.RawIO.Read(bytesToRead);
+                }
+                catch (IOTimeoutException e)
+                {
+                    throw new TimeoutException("Timeout in ReadRawData", e);
+                }
             }
         }
 
@@ -71,7 +92,7 @@ namespace libSALT
                 completed = waitHandleIO.WaitOne(30000);  // wait until the write operation has completed or timed out
                 if (!completed)  // check to see that the operation completed without timing out.
                 {
-                    throw new TimeoutException();  // if it did time out, throw a timeout exception
+                    throw new TimeoutException("Timeout in WriteRawData");  // if it did time out, throw a timeout exception
                 }
                 mbSession.RawIO.EndWrite(result);  // end the write, freeing up system resources.
             }
@@ -85,7 +106,13 @@ namespace libSALT
         /// <param name="time">The value to set I/O timeout to, in milliseconds</param>
         protected void SetIOTimeout(int time)  // should this be a public method?
         {
-            mbSession.TimeoutMilliseconds = time;
+            if (time >= 0)
+            {
+                mbSession.TimeoutMilliseconds = time;
+            } else
+            {
+                mbSession.TimeoutMilliseconds = VisaConstants.InfiniteTimeout;  // this should work
+            }
         }
 
         /// <summary>
@@ -94,7 +121,7 @@ namespace libSALT
         /// even if the device is not connected over a VISA interface. The device must be on and connected for this function to work.
         /// </summary>
         /// <returns>An identification string unique to the device, in the format "<Manufacturer>, <Model>, <Serial_Number>"</returns>
-        /// <exception cref="InvalidOperationException">thrown if the device is not on or not connected</exception>
+        /// <exception cref="TimeoutException">thrown if the device is not on or not connected</exception>
         public string GetIdentificationString()
         {
             string response;
@@ -102,9 +129,9 @@ namespace libSALT
             {
                 response = WriteRawQuery("*IDN?");
             }
-            catch (IOTimeoutException e)  // if there's a VISA timeout
+            catch (IOTimeoutException e)  // if there's a VISA timeout (we should catch VISA exceptions and then throw non-VISA ones)
             {
-                throw new InvalidOperationException("VISA Device Timeout", e);
+                throw new TimeoutException("VISA Device Timeout", e);
             }
             string[] tokens = response.Split(',');
             string toReturn = tokens[0] + tokens[1] + tokens[2];
@@ -228,6 +255,7 @@ namespace libSALT
         /// </summary>
         /// <param name="command">The command to write</param>
         /// <param name="timeout">The timeout of the command, in ms</param>
+        /// <remarks>Currently unused, but could be extremely useful in the future</remarks>
         /// <exception cref="NativeVisaException">Thrown if the request times out</exception>
         private void WriteRawCommandWithServiceRequest(string command, int timeout)
         {
@@ -255,8 +283,8 @@ namespace libSALT
             {
                 mbSession.FormattedIO.WriteLine("RST*");
                 Thread.Sleep(5000);  // there is actually no other way to do this. All event/status byte registers are cleared when doing a reset command
-                                      // which means that trying to do this with a callback will always result in a timeout error. 5 seconds seems like 
-                                      //enough to me.
+                                     // which means that trying to do this with a callback will always result in a timeout error. 5 seconds seems like 
+                                     //enough to me.
             }
         }
     }
