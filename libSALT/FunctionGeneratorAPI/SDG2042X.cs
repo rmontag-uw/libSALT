@@ -46,7 +46,7 @@ namespace libSALT.FunctionGeneratorAPI
         public override void CalibrateWaveform(int channel)
         {
             CheckChannelParam(channel);
-            WriteRawCommand("C" + channel + ":BSWV WVTP,SINE,AMP,1V,FRQ,500,OFST,0V,PHSE,0");  // generate a 500 Hz, 1Vpp Sine wave on the given channel
+            WriteRawCommand("C" + channel + ":BSWV WVTP,SINE,AMP,.5V,FRQ,25,OFST,0V,PHSE,0");  // generate a 500 Hz, 1Vpp Sine wave on the given channel
             SetOutputOn(channel);  // turn on the channel after calibration waveform is created
         }
 
