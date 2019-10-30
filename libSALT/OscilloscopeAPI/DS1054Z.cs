@@ -83,7 +83,7 @@ namespace libSALT.OscilloscopeAPI
             WriteRawCommand(":wav:mode norm");  // set the waveform capture mode to normal
             WriteRawCommand(":wav:form byte");  // set the waveform format to byte (fastest and can capture the most data at once)
 
-            SetIOTimeout(-1);  // the thing about this is that for this scope in particular, the reading of data can just take a long time when at high time/div
+            SetIOTimeout(100000);  // the thing about this is that for this scope in particular, the reading of data can just take a long time when at high time/div
             // values. It seems that the trigger status is not a perfect way to gather this information, and this is not a perfect workaround, but for now, it's what
             // we have.
 

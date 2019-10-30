@@ -106,7 +106,13 @@ namespace libSALT
         /// <param name="time">The value to set I/O timeout to, in milliseconds</param>
         protected void SetIOTimeout(int time)  // should this be a public method?
         {
-            mbSession.TimeoutMilliseconds = time;
+            if (time >= 0)
+            {
+                mbSession.TimeoutMilliseconds = time;
+            } else
+            {
+                mbSession.TimeoutMilliseconds = VisaConstants.InfiniteTimeout;  // this should work
+            }
         }
 
         /// <summary>
