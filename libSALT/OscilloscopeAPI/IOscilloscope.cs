@@ -2,6 +2,16 @@
 
 namespace libSALT.OscilloscopeAPI
 {
+
+    public enum TriggerStatus
+    {
+        Triggered = 1,
+        Waiting = 2,
+        Running = 3,
+        Auto = 4,
+        Stoppd = 5,
+    }
+
     public interface IOscilloscope : ITestAndMeasurement
     {
         // Keep in mind that (at least as of yet), Getter commands that contain a channel parameter likely set the active channel to that parameter
@@ -385,5 +395,11 @@ namespace libSALT.OscilloscopeAPI
         /// </summary>
         /// <returns>The ideal number of oscilloscope points captured from the screen</returns>
         int GetNumPointsPerScreenCapture();
+
+        /// <summary>
+        /// Returns the status of the oscilloscope trigger as a TriggerStatus enum. 
+        /// </summary>
+        /// <returns></returns>
+        TriggerStatus GetTriggerStatus();
     }
 }
