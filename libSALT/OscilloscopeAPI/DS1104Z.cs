@@ -29,6 +29,8 @@ namespace libSALT.OscilloscopeAPI
         private readonly double[] timeScalePresets = new[] { 0.000000005, 0.000000010, 0.000000020, 0.000000050, 0.000000100,
             0.000000200, 0.000000500, 0.000001000, 0.000002000, 0.000005000, 0.000010000, 0.000020000, 0.00005, 0.00010, 0.00020,
             0.00050, 0.00100, 0.00200, 0.00500, .01, .02, .05, .1, .2, .5, 1, 2, 5, 10, 20, 50};
+            // one of the scopes we got from Amazon shows up as a DS1054Z, the other a DS1104Z. They both seem to have the upgraded memory, so I'm not sure how to handle
+            // a scope that doesn't, especially because there's no way to tell them apart via SCPI commands if they both show up as the same device (DS1054Z)
         private readonly int[] channelOneOnlyAllowedMemDepth = new[] { 12000, 120000, 1200000, 12000000, 24000000 };
         private readonly int[] dualChannelAllowedMemDepth = new[] { 6000, 60000, 600000, 6000000, 12000000 };
         private readonly int[] threeAndFourChannelAllowedMemDepth = new[] { 3000, 30000, 300000, 3000000, 6000000 };
@@ -468,6 +470,26 @@ namespace libSALT.OscilloscopeAPI
         public override int GetNumPointsPerScreenCapture()
         {
             return numPointsPerScreen;
+        }
+
+        public override TriggerStatus GetTriggerStatus()
+        {
+            string triggerStatus = WriteRawQuery(":TRIGger:STATus?");
+            switch (triggerStatus)
+            {
+                case "TG":
+                    return TriggerStatus.Triggered;
+                case "WAIT":
+                    return TriggerStatus.Waiting;
+                case "RUN":
+                    return TriggerStatus.Running;
+                case "AUTO":
+                    return TriggerStatus.Auto;
+                case "STOP":
+                    return TriggerStatus.Stopped;
+                default:
+                    return TriggerStatus.Unknown_Status;
+            }
         }
     }
 }

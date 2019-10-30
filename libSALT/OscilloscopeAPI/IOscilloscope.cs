@@ -9,7 +9,8 @@ namespace libSALT.OscilloscopeAPI
         Waiting = 2,
         Running = 3,
         Auto = 4,
-        Stoppd = 5,
+        Stopped = 5,
+        Unknown_Status = 6
     }
 
     public interface IOscilloscope : ITestAndMeasurement
@@ -397,9 +398,12 @@ namespace libSALT.OscilloscopeAPI
         int GetNumPointsPerScreenCapture();
 
         /// <summary>
-        /// Returns the status of the oscilloscope trigger as a TriggerStatus enum. 
+        /// Returns the status of the oscilloscope trigger as a TriggerStatus enum. This can help clients determine the overall state of the oscilloscope
         /// </summary>
-        /// <returns></returns>
+        /// <remarks>This can be used to check if the trigger status is "Waiting" after switching from a small time/div to a large time/div, and handle the possible
+        /// timeout errors appropriately.
+        /// </remarks>
+        /// <returns>The status of the trigger as a TriggerStatus enum</returns>
         TriggerStatus GetTriggerStatus();
     }
 }

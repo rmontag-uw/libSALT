@@ -469,5 +469,25 @@ namespace libSALT.OscilloscopeAPI
         {
             return numPointsPerScreen;
         }
+
+        public override TriggerStatus GetTriggerStatus()
+        {
+            string triggerStatus = WriteRawQuery(":TRIGger:STATus?");
+            switch (triggerStatus)
+            {
+                case "TG":
+                    return TriggerStatus.Triggered;
+                case "WAIT":
+                    return TriggerStatus.Waiting;
+                case "RUN":
+                    return TriggerStatus.Running;
+                case "AUTO":
+                    return TriggerStatus.Auto;
+                case "STOP":
+                    return TriggerStatus.Stopped;
+                default:
+                    return TriggerStatus.Unknown_Status;
+            }
+        }
     }
 }
