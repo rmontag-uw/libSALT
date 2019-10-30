@@ -37,7 +37,7 @@ namespace libSALT
         {
             lock (threadLock)
             {
-                try
+                try  // are these try/catch blocks too slow???
                 {
                     mbSession.FormattedIO.WriteLine(query);
                     return mbSession.FormattedIO.ReadLine();
