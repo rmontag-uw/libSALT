@@ -109,7 +109,8 @@ namespace libSALT
             if (time >= 0)
             {
                 mbSession.TimeoutMilliseconds = time;
-            } else
+            }
+            else
             {
                 mbSession.TimeoutMilliseconds = VisaConstants.InfiniteTimeout;  // this should work
             }
@@ -163,6 +164,28 @@ namespace libSALT
             {
                 this.connectedDevices = connectedDevices;
                 this.unknownDeviceConnected = unknownDeviceConnected;
+            }
+        }
+
+
+        // attempts to open a VISA resource given the VISA identifier, returns null if the resource does not exist or cannot be opened.
+        protected static T TryOpen<T>(string visaID) where T : VISADevice, ITestAndMeasurement
+        {
+            try
+            {
+                IMessageBasedSession searcherMBS = GlobalResourceManager.Open(visaID) as IMessageBasedSession;  // attempt to open the message session
+                searcherMBS.FormattedIO.WriteLine("*IDN?");  // All SCPI compliant devices (and therefore all VISA devices) are required to respon to *IDN?
+                string IDNResponse = searcherMBS.FormattedIO.ReadLine();
+                string[] tokens = IDNResponse.Split(',');   // hopefully this isn't too slow
+                string formattedIDNString = tokens[1];  // we run the IDN command on all connected devices
+                T temp = GetDeviceFromModelString<T>(formattedIDNString, visaID);
+                return temp;
+            }
+            catch (VisaException)
+            {
+                return null;  // if there is an error in the constructor, return null.
+                // Yes I know exception handling is expensive and should not be used for control flow purposes, but the VISA functions throw an error instead of returning
+                // null or something when a device cannot be opened.
             }
         }
 
