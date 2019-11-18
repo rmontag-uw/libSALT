@@ -302,13 +302,13 @@ namespace libSALT
         /// </summary>
         public void Reset()
         {
-            lock (threadLock)
-            {
-                mbSession.FormattedIO.WriteLine("RST*");
-                Thread.Sleep(5000);  // there is actually no other way to do this. All event/status byte registers are cleared when doing a reset command
-                                     // which means that trying to do this with a callback will always result in a timeout error. 5 seconds seems like 
-                                     //enough to me.
-            }
+            //lock (threadLock)
+            //{
+            //    mbSession.FormattedIO.WriteLine("RST*");
+            //    Thread.Sleep(5000);  // there is actually no other way to do this. All event/status byte registers are cleared when doing a reset command
+            //                         // which means that trying to do this with a callback will always result in a timeout error. 5 seconds seems like 
+            //                         //enough to me.
+            //}
         }
     }
 }
