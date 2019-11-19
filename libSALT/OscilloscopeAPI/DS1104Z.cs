@@ -1,4 +1,10 @@
-﻿using System;
+﻿/* Rigol DS1104Z Oscilloscope API Implementation
+ * S.A.L.T Project Library
+ * Written by Maurice Montag, 2019
+ * BioRobotics Lab, University of Washington, Seattle
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;

@@ -1,4 +1,11 @@
-﻿using System;
+﻿/* StubFunctionGenerator Function Generator API Implementation
+ * Used for Debugging
+ * S.A.L.T Project Library
+ * Written by Maurice Montag, 2019
+ * BioRobotics Lab, University of Washington, Seattle
+ */
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;

@@ -1,4 +1,10 @@
-﻿using System;
+﻿/* VISA Function Generator Abstract Class
+ * S.A.L.T Project Library
+ * Written by Maurice Montag, 2019
+ * BioRobotics Lab, University of Washington, Seattle
+ */
+
+using System;
 
 namespace libSALT.FunctionGeneratorAPI
 {

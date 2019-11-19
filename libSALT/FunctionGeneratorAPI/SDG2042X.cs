@@ -1,4 +1,10 @@
-﻿using System;
+﻿/* Siglent SDG2042X Function Generator API Implementation
+ * S.A.L.T Project Library
+ * Written by Maurice Montag, 2019
+ * BioRobotics Lab, University of Washington, Seattle
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;

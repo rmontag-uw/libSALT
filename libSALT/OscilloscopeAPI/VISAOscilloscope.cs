@@ -1,9 +1,15 @@
-﻿using System;
+﻿/* VISA Oscilloscope Abstract Class
+ * S.A.L.T Project Library
+ * Written by Maurice Montag, 2019
+ * BioRobotics Lab, University of Washington, Seattle
+ */
+
+using System;
 using System.Drawing;
 
 namespace libSALT.OscilloscopeAPI
 {
-    public abstract class VISAOscilloscope : VISADevice, IOscilloscope
+    public abstract class VISAOscilloscope : VISADevice, IOscilloscope  // this class represents an oscilloscope connected to the computer with a VISA based connection
     {
         protected int numChannels;  // the number of channels that this oscilloscope has
         protected static readonly object threadLock = new object();

@@ -1,4 +1,10 @@
-﻿using System;
+﻿/* Top Level Interface for Test and Measurement Devices
+ * S.A.L.T Project Library
+ * Written by Maurice Montag, 2019
+ * BioRobotics Lab, University of Washington, Seattle
+ */
+
+using System;
 
 namespace libSALT
 {

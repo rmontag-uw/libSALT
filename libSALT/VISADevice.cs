@@ -1,4 +1,10 @@
-﻿using System;
+﻿/* Top Level VISA Device Abstract Class
+ * S.A.L.T Project Library
+ * Written by Maurice Montag, 2019
+ * BioRobotics Lab, University of Washington, Seattle
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -11,9 +17,10 @@ namespace libSALT
     /// </summary>
     public abstract class VISADevice : ITestAndMeasurement
     {
-        protected readonly string visaID;  // visaID of this oscilloscope.
-        private readonly IMessageBasedSession mbSession;  // the message session between the computer and the oscilloscope hardware
-                                                          // this used to be protected, if there are any extremely device specific reasons that require access to the message session, I might change it back
+        protected readonly string visaID;  // visaID of this device.
+        private readonly IMessageBasedSession mbSession;  // the message session between the computer and the hardware
+                                                          // this used to be protected, if there are any extremely device specific reasons that 
+        // require access to the message session, I might change it back
         private readonly object threadLock;  // each device can have its own I/O thread.
         private WaitHandle waitHandleIO;  // callback stuff
         private readonly ManualResetEvent manualResetEventIO;
