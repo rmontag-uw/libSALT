@@ -53,6 +53,11 @@ namespace libSALT.FunctionGeneratorAPI
             return GetConnectedDevices<VISAFunctionGenerator>();
         }
 
+        public static VISAFunctionGenerator TryOpen(string visaID)
+        {
+            return TryOpen<VISAFunctionGenerator>(visaID);
+        }
+
         // HELPER METHODS
 
         /*

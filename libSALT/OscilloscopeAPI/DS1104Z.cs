@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Threading;
 
 namespace libSALT.OscilloscopeAPI
 {
@@ -83,7 +84,6 @@ namespace libSALT.OscilloscopeAPI
             WriteRawCommand(":wav:sour chan" + channel);  // set the channel to grab the wavedata from to the one specified
             WriteRawCommand(":wav:mode norm");  // set the waveform capture mode to normal
             WriteRawCommand(":wav:form byte");  // set the waveform format to byte (fastest and can capture the most data at once)
-            SetIOTimeout(100000);  // the thing about this is that for this scope in particular, the reading of data can just take a long time when at high time/div
             // values. It seems that the trigger status is not a perfect way to gather this information, and this is not a perfect workaround, but for now, it's what
             // we have.
 
@@ -113,6 +113,9 @@ namespace libSALT.OscilloscopeAPI
             {
                 toReturn.Add(ScaleVoltage(b, YOrigin, Yinc, Yref));
             }
+            WriteRawCommand(":wav:start 1");
+            WriteRawCommand("wav:stop 1200");
+            Thread.Sleep(500);
             return toReturn.ToArray();
         }
 
@@ -477,24 +480,24 @@ namespace libSALT.OscilloscopeAPI
             return numPointsPerScreen;
         }
 
-        public override TriggerStatus GetTriggerStatus()
-        {
-            string triggerStatus = WriteRawQuery(":TRIGger:STATus?");
-            switch (triggerStatus)
-            {
-                case "TG":
-                    return TriggerStatus.Triggered;
-                case "WAIT":
-                    return TriggerStatus.Waiting;
-                case "RUN":
-                    return TriggerStatus.Running;
-                case "AUTO":
-                    return TriggerStatus.Auto;
-                case "STOP":
-                    return TriggerStatus.Stopped;
-                default:
-                    return TriggerStatus.Unknown_Status;
-            }
-        }
+        //public override TriggerStatus GetTriggerStatus()
+        //{
+        //    string triggerStatus = WriteRawQuery(":TRIGger:STATus?");
+        //    switch (triggerStatus)
+        //    {
+        //        case "TG":
+        //            return TriggerStatus.Triggered;
+        //        case "WAIT":
+        //            return TriggerStatus.Waiting;
+        //        case "RUN":
+        //            return TriggerStatus.Running;
+        //        case "AUTO":
+        //            return TriggerStatus.Auto;
+        //        case "STOP":
+        //            return TriggerStatus.Stopped;
+        //        default:
+        //            return TriggerStatus.Unknown_Status;
+        //    }
+        //}
     }
 }

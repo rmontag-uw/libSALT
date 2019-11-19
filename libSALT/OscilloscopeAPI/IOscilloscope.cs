@@ -404,6 +404,6 @@ namespace libSALT.OscilloscopeAPI
         /// timeout errors appropriately.
         /// </remarks>
         /// <returns>The status of the trigger as a TriggerStatus enum</returns>
-        TriggerStatus GetTriggerStatus();
+       // TriggerStatus GetTriggerStatus();
     }
 }
