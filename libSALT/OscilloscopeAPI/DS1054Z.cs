@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Threading;
 
 namespace libSALT.OscilloscopeAPI
 {
@@ -108,9 +107,6 @@ namespace libSALT.OscilloscopeAPI
             {
                 toReturn.Add(ScaleVoltage(b, YOrigin, Yinc, Yref));
             }
-            WriteRawCommand(":wav:start 1");
-            WriteRawCommand("wav:stop 1200");
-            Thread.Sleep(500);
             return toReturn.ToArray();
         }
 
@@ -246,7 +242,7 @@ namespace libSALT.OscilloscopeAPI
         public override int GetActiveChannel()
         {
             // query response looks like: "CHAN2"
-            return int.Parse(WriteRawQuery("wav:sour?").Substring(3, 1));
+            return int.Parse(WriteRawQuery("wav:sour?").Substring(4, 1));
         }
 
         public override double GetYScale()
@@ -390,11 +386,14 @@ namespace libSALT.OscilloscopeAPI
 
         public override int[] GetAllowedMemDepths()
         {
+            Console.WriteLine(enabledChannels.Count());
             if (enabledChannels.Count() == 1)
             {
                 if (enabledChannels.Contains(1))  // it's a weird quirk that we can only use the large memdepths when only channel 1 is enabled
                 {
+                    Console.WriteLine("EEEE");
                     return channelOneOnlyAllowedMemDepth;
+                    
                 }
                 return dualChannelAllowedMemDepth;  // we have to use the "dual channel" memory depth setting if any of the others are enabled, even if it's just channel 2 for
                                                     // example.
@@ -474,24 +473,24 @@ namespace libSALT.OscilloscopeAPI
             return numPointsPerScreen;
         }
 
-        //public override TriggerStatus GetTriggerStatus()
-        //{
-        //    string triggerStatus = WriteRawQuery(":TRIGger:STATus?");
-        //    switch (triggerStatus)
-        //    {
-        //        case "TG":
-        //            return TriggerStatus.Triggered;
-        //        case "WAIT":
-        //            return TriggerStatus.Waiting;
-        //        case "RUN":
-        //            return TriggerStatus.Running;
-        //        case "AUTO":
-        //            return TriggerStatus.Auto;
-        //        case "STOP":
-        //            return TriggerStatus.Stopped;
-        //        default:
-        //            return TriggerStatus.Unknown_Status;
-        //    }
-        //}
+        public override TriggerStatus GetTriggerStatus()
+        {
+            string triggerStatus = WriteRawQuery(":TRIGger:STATus?");
+            switch (triggerStatus)
+            {
+                case "TG":
+                    return TriggerStatus.Triggered;
+                case "WAIT":
+                    return TriggerStatus.Waiting;
+                case "RUN":
+                    return TriggerStatus.Running;
+                case "AUTO":
+                    return TriggerStatus.Auto;
+                case "STOP":
+                    return TriggerStatus.Stopped;
+                default:
+                    return TriggerStatus.Unknown_Status;
+            }
+        }
     }
 }

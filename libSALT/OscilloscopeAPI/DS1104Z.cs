@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Threading;
 
 namespace libSALT.OscilloscopeAPI
 {
@@ -110,9 +109,6 @@ namespace libSALT.OscilloscopeAPI
             {
                 toReturn.Add(ScaleVoltage(b, YOrigin, Yinc, Yref));
             }
-            WriteRawCommand(":wav:start 1");
-            WriteRawCommand("wav:stop 1200");
-            Thread.Sleep(500);
             return toReturn.ToArray();
         }
 
@@ -477,24 +473,24 @@ namespace libSALT.OscilloscopeAPI
             return numPointsPerScreen;
         }
 
-        //public override TriggerStatus GetTriggerStatus()
-        //{
-        //    string triggerStatus = WriteRawQuery(":TRIGger:STATus?");
-        //    switch (triggerStatus)
-        //    {
-        //        case "TG":
-        //            return TriggerStatus.Triggered;
-        //        case "WAIT":
-        //            return TriggerStatus.Waiting;
-        //        case "RUN":
-        //            return TriggerStatus.Running;
-        //        case "AUTO":
-        //            return TriggerStatus.Auto;
-        //        case "STOP":
-        //            return TriggerStatus.Stopped;
-        //        default:
-        //            return TriggerStatus.Unknown_Status;
-        //    }
-        //}
+        public override TriggerStatus GetTriggerStatus()
+        {
+            string triggerStatus = WriteRawQuery(":TRIGger:STATus?");
+            switch (triggerStatus)
+            {
+                case "TG":
+                    return TriggerStatus.Triggered;
+                case "WAIT":
+                    return TriggerStatus.Waiting;
+                case "RUN":
+                    return TriggerStatus.Running;
+                case "AUTO":
+                    return TriggerStatus.Auto;
+                case "STOP":
+                    return TriggerStatus.Stopped;
+                default:
+                    return TriggerStatus.Unknown_Status;
+            }
+        }
     }
 }
