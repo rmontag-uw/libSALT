@@ -84,7 +84,7 @@ namespace libSALT.OscilloscopeAPI
             WriteRawCommand(":wav:mode norm");  // set the waveform capture mode to normal
             WriteRawCommand(":wav:form byte");  // set the waveform format to byte (fastest and can capture the most data at once)
             byte[] rawData = ReadRawData(":wav:data?", 1212); // grab the wave data from the scope by reading it as a byte array
-            SetIOTimeout(2000);
+            SetIOTimeout(3000);
             /*  Data processing. The waveform data read contains the TMC header. The length of the header is 11
                 bytes, wherein, the first 2 bytes are the TMC header denoter (#) and the width descriptor (9)
                 respectively, the 9 bytes following are the length of the data which is followed by the waveform data
