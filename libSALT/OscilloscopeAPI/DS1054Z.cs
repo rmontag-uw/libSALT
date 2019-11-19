@@ -390,12 +390,10 @@ namespace libSALT.OscilloscopeAPI
 
         public override int[] GetAllowedMemDepths()
         {
-            Console.WriteLine(enabledChannels.Count());
             if (enabledChannels.Count() == 1)
             {
                 if (enabledChannels.Contains(1))  // it's a weird quirk that we can only use the large memdepths when only channel 1 is enabled
                 {
-                    Console.WriteLine("EEEE");
                     return channelOneOnlyAllowedMemDepth;
                     
                 }
