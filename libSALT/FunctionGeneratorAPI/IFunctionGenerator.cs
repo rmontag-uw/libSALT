@@ -149,7 +149,7 @@ namespace libSALT.FunctionGeneratorAPI
          * throws an ArgumentOutOfRangeException if the given channel doesn't exist
          * 
          * 
-         * DEVELOPER USE: should I add a String "waveformType" parameter or nah?
+         * DEVELOPER USE: should I add a String "waveformType" parameter or nah (put that in v2)
          */
          /// <summary>
          /// Generates a calibration waveform (500 Hz, 1Vpp Sine wave), used for checking the test rig's oscillocope,
