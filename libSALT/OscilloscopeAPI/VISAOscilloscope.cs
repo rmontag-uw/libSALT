@@ -29,11 +29,6 @@ namespace libSALT.OscilloscopeAPI
             return GetConnectedDevices<VISAOscilloscope>();
         }
 
-        public static VISAOscilloscope TryOpen(string visaID)
-        {
-            return TryOpen<VISAOscilloscope>(visaID);
-        }
-
         protected void CheckChannelParam(int channel)
         {
             if (channel > GetNumChannels() || channel < 1)  // throw an exception if the channel being asked for is
@@ -91,6 +86,6 @@ namespace libSALT.OscilloscopeAPI
         public abstract int GetNumVerticalDivisions();
         public abstract int GetNumHorizontalDivisions();
         public abstract int GetNumPointsPerScreenCapture();
-       // public abstract TriggerStatus GetTriggerStatus();
+        public abstract TriggerStatus GetTriggerStatus();
     }
 }
