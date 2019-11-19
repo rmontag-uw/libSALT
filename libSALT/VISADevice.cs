@@ -244,6 +244,29 @@ namespace libSALT
             // if there's no matches, then there's a device connected that doesn't have an associated implementation, so we return null
             return null;
         }
+
+        // attempts to open a VISA resource given the VISA identifier, returns null if the resource does not exist or cannot be opened.
+        protected static T TryOpen<T>(string visaID) where T : VISADevice, ITestAndMeasurement
+        {
+            try
+            {
+                IMessageBasedSession searcherMBS = GlobalResourceManager.Open(visaID) as IMessageBasedSession;  // attempt to open the message session
+                searcherMBS.FormattedIO.WriteLine("*IDN?");  // All SCPI compliant devices (and therefore all VISA devices) are required to respon to *IDN?
+                string IDNResponse = searcherMBS.FormattedIO.ReadLine();
+                string[] tokens = IDNResponse.Split(',');   // hopefully this isn't too slow
+                string formattedIDNString = tokens[1];  // we run the IDN command on all connected devices
+                T temp = GetDeviceFromModelString<T>(formattedIDNString, visaID);
+                return temp;
+            }
+            catch (VisaException)
+            {
+                return null;  // if there is an error in the constructor, return null.
+                // Yes I know exception handling is expensive and should not be used for control flow purposes, but the VISA functions throw an error instead of returning
+                // null or something when a device cannot be opened.
+            }
+        }
+
+
         private void OnWriteComplete(IVisaAsyncResult result)  // for callbacks on data writing
         {
             manualResetEventIO.Set();  // set the IO manual reset event.
@@ -279,13 +302,13 @@ namespace libSALT
         /// </summary>
         public void Reset()
         {
-            lock (threadLock)
-            {
-                mbSession.FormattedIO.WriteLine("RST*");
-                Thread.Sleep(5000);  // there is actually no other way to do this. All event/status byte registers are cleared when doing a reset command
-                                     // which means that trying to do this with a callback will always result in a timeout error. 5 seconds seems like 
-                                     //enough to me.
-            }
+            //lock (threadLock)
+            //{
+            //    mbSession.FormattedIO.WriteLine("RST*");
+            //    Thread.Sleep(5000);  // there is actually no other way to do this. All event/status byte registers are cleared when doing a reset command
+            //                         // which means that trying to do this with a callback will always result in a timeout error. 5 seconds seems like 
+            //                         //enough to me.
+            //}
         }
     }
 }
