@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Threading;
 
 namespace libSALT.OscilloscopeAPI
 {
@@ -107,6 +108,9 @@ namespace libSALT.OscilloscopeAPI
             {
                 toReturn.Add(ScaleVoltage(b, YOrigin, Yinc, Yref));
             }
+            WriteRawCommand(":wav:start 1");
+            WriteRawCommand("wav:stop 1200");
+            Thread.Sleep(500);
             return toReturn.ToArray();
         }
 

@@ -249,7 +249,7 @@ namespace libSALT.OscilloscopeAPI
         public override int GetActiveChannel()
         {
             // query response looks like: "CHAN2"
-            return int.Parse(WriteRawQuery("wav:sour?").Substring(3, 1));
+            return int.Parse(WriteRawQuery("wav:sour?").Substring(4, 1));
         }
 
         public override double GetYScale()
