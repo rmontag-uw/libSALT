@@ -2,7 +2,9 @@
  * Used for Debugging
  * S.A.L.T Project Library
  * Written by Maurice Montag, 2019
- * BioRobotics Lab, University of Washington, Seattle
+ * Developed as a collaboration between GRIDLab and BioRobotics Lab, University of Washington, Seattle
+ * Copyright 2019 University of Washington
+ * See included LICENSE.TXT for license information
  */
 
 using System;
