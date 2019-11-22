@@ -1,2 +1,2 @@
 # libSALT
-The C# library for the S.A.L.T platform
+The C# library for the aline Adaptive-stim Laboratory Testing (S.A.L.T) platform
